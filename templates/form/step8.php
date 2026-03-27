@@ -254,11 +254,22 @@ ob_start();
                 </div>
                 <div id="coupon-message" class="crs-coupon-message" style="display: none;"></div>
                 
-                <!-- Applied Coupon Details -->
+                <!-- Applied Coupon Details - Updated with Type Display -->
                 <div id="coupon-details" class="crs-coupon-details" style="<?php echo $applied_coupon ? 'display: flex;' : 'display: none;'; ?>">
                     <span class="crs-coupon-label"><?php _e('Coupon Applied:', 'crscngres'); ?></span>
                     <span class="crs-coupon-code"><?php echo $applied_coupon ? esc_html($applied_coupon->code) : ''; ?></span>
-                    <span class="crs-coupon-discount">-€<?php echo number_format($discount_amount, 0); ?></span>
+                    <span class="crs-coupon-type" id="coupon-type-badge" style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">
+                        <?php 
+                        if ($applied_coupon) {
+                            if ($applied_coupon->discount_type === 'percentage') {
+                                echo $applied_coupon->discount_value . '% OFF';
+                            } else {
+                                echo '€' . $applied_coupon->discount_value . ' OFF';
+                            }
+                        }
+                        ?>
+                    </span>
+                    <span class="crs-coupon-discount" id="coupon-discount-value">-€<?php echo number_format($discount_amount, 0); ?></span>
                     <button type="button" class="crs-coupon-remove" id="remove-coupon">×</button>
                 </div>
             </div>

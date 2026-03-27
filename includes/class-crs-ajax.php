@@ -235,9 +235,19 @@ class CRS_Ajax {
         
         $data = json_decode(stripslashes($_POST['data']), true);
         
-        error_log('CRS: Creating payment intent - User ID: ' . $user_id);
+        // IMPORTANT: Make sure coupon data is in the data array
+        // Get coupon code from formData if present
+        $coupon_code = '';
+        if (isset($data['applied_coupon_code']) && !empty($data['applied_coupon_code'])) {
+            $coupon_code = $data['applied_coupon_code'];
+        }
         
+        error_log('CRS: Creating payment intent - User ID: ' . $user_id . ', Coupon: ' . $coupon_code);
+        
+        // Calculate total with coupon
         $total = CRS_Payment::calculateTotal($data);
+        
+        error_log('CRS: Calculated total after coupon: ' . $total);
         
         // Handle proof file upload
         $proof_file_data = $_POST['proof_file_data'] ?? '';
@@ -250,7 +260,7 @@ class CRS_Ajax {
             $proof_file_url = $proof_file_id ? wp_get_attachment_url($proof_file_id) : '';
         }
         
-        // Create Stripe Payment Intent
+        // Create Stripe Payment Intent with calculated total
         $result = CRS_Payment::createPaymentIntent($total, $user_id, $data, $proof_file_id, $proof_file_url, $proof_file_name);
         
         if ($result['success']) {
@@ -261,20 +271,24 @@ class CRS_Ajax {
         }
     }
     
-    public static function crs_confirm_stripe_payment() {
-        check_ajax_referer('crs_nonce', 'nonce');
-        
-        $intent_id = sanitize_text_field($_POST['intent_id']);
-        $temp_booking_id = sanitize_text_field($_POST['temp_booking_id']);
-        
-        $result = CRS_Payment::confirmPayment($intent_id, $temp_booking_id);
-        
-        if ($result['success']) {
-            wp_send_json_success($result['data']);
-        } else {
-            wp_send_json_error($result['error']);
-        }
+public static function crs_confirm_stripe_payment() {
+    check_ajax_referer('crs_nonce', 'nonce');
+    
+    $intent_id = sanitize_text_field($_POST['intent_id']);
+    $temp_booking_id = sanitize_text_field($_POST['temp_booking_id']);
+    
+    error_log('CRS: Confirm payment - Intent ID: ' . $intent_id . ', Temp ID: ' . $temp_booking_id);
+    
+    $result = CRS_Payment::confirmPayment($intent_id, $temp_booking_id);
+    
+    if ($result['success']) {
+        error_log('CRS: Payment confirmed, booking ID: ' . $result['data']['booking_id']);
+        wp_send_json_success($result['data']);
+    } else {
+        error_log('CRS: Payment confirmation failed - ' . ($result['error'] ?? 'Unknown error'));
+        wp_send_json_error($result['error']);
     }
+}
     
     public static function crs_load_documents_page() {
         check_ajax_referer('crs_nonce', 'nonce');
@@ -427,13 +441,15 @@ private static function getStep8Html($congress_id, $data) {
         }
         $coupon_obj = new CRS_Coupon();
         $result = $coupon_obj->validate_coupon($data['applied_coupon_code'], $subtotal, get_current_user_id());
-        
+        var_dump($result);
+        error_log($result);
         if ($result['valid']) {
             $applied_coupon = $result['coupon'];
             $discount_amount = $result['discount'];
             $total = $result['final_amount'];
         }
     }
+
     
     ob_start();
     ?>
@@ -541,61 +557,109 @@ private static function getStep8Html($congress_id, $data) {
             
             <!-- Right Column - Economic Summary -->
             <div class="crs-summary-right">
-                <!-- Coupon Section - Professional Design -->
-                <div class=" coupon-section" style="background: #ffffff; border: 1px solid #e0e7ff; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.05); transition: all 0.2s ease;">
-                    
-                    <!-- Header with modern icon -->
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-                        <div style="background: #e0e7ff; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                            <span style="font-size: 18px; color: #4f46e5;">🏷️</span>
-                        </div>
-                        <h4 style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0; letter-spacing: -0.01em;"><?php _e('Have a coupon?', 'crscngres'); ?></h4>
+
+            <!-- Coupon Section - Professional Design -->
+            <div class="crs-coupon-container" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                
+                <!-- Header -->
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 18px;">🏷️</span>
                     </div>
-                    
-                    <!-- Input group - side by side on desktop, stacked on mobile -->
-                    <div class="crs-coupon-input-group" style="display: flex; gap: 12px; align-items: center;">
-                        <div style="flex: 1; position: relative;">
-                            <input type="text" class="crs-input" id="coupon_code" 
-                                placeholder="<?php _e('Enter coupon code', 'crscngres'); ?>" 
-                                value="<?php echo isset($data['applied_coupon_code']) ? esc_attr($data['applied_coupon_code']) : ''; ?>"
-                                style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-weight: 500; letter-spacing: 0.3px; transition: all 0.2s; background: #f8fafc;">
-                        </div>
-                        
-                        <button type="button" class="crs-btn crs-btn-secondary" id="apply-coupon" 
-                                style="padding: 12px 24px; background: #4f46e5; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; color: white; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);">
-                            <?php _e('Apply', 'crscngres'); ?>
-                        </button>
-                    </div>
-                    
-                    <!-- Message area -->
-                    <div id="coupon-message" class="crs-coupon-message" style="display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 500;"></div>
-                    
-                    <!-- Applied coupon details - clean design -->
-                    <div id="coupon-details" class="crs-coupon-details" 
-                        style="<?php echo $applied_coupon ? 'display: flex;' : 'display: none;'; ?> margin-top: 16px; padding: 14px 16px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        
-                        <span style="color: #0369a1; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-                            <span style="font-size: 14px;">✓</span> 
-                            <?php _e('Applied', 'crscngres'); ?>
-                        </span>
-                        
-                        <span class="crs-coupon-code" style="background: #0369a1; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">
-                            <?php echo $applied_coupon ? esc_html($applied_coupon->code) : ''; ?>
-                        </span>
-                        
-                        <span class="crs-coupon-discount" style="background: #059669; color: white; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 600;">
-                            -€<?php echo number_format($discount_amount, 0); ?>
-                        </span>
-                        
-                        <button type="button" class="crs-coupon-remove" id="remove-coupon" 
-                                style="margin-left: auto; background: transparent; border: none; font-size: 20px; cursor: pointer; color: #64748b; padding: 0 4px; line-height: 1; transition: color 0.2s;"
-                                onmouseover="this.style.color='#dc2626'" 
-                                onmouseout="this.style.color='#64748b'">
-                            ×
-                        </button>
+                    <div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0;"><?php _e('Have a coupon?', 'crscngres'); ?></h4>
+                        <p style="font-size: 12px; color: #64748b; margin: 2px 0 0 0;">Enter your code for instant discount</p>
                     </div>
                 </div>
                 
+                <!-- Input Group -->
+                <div class="crs-coupon-input-group" style="display: flex; gap: 12px; margin-bottom: 15px;">
+                    <div style="flex: 1; position: relative;">
+                        <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px;">🔖</span>
+                        <input type="text" class="crs-input" id="coupon_code" 
+                            placeholder="<?php _e('Enter coupon code', 'crscngres'); ?>" 
+                            value="<?php echo isset($data['applied_coupon_code']) ? esc_attr($data['applied_coupon_code']) : ''; ?>"
+                            style="width: 100%; padding: 12px 12px 12px 38px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; background: #fafcff; transition: all 0.2s;">
+                    </div>
+                    <button type="button" id="apply-coupon" 
+                            style="padding: 12px 28px; background: #4f46e5; border: none; border-radius: 10px; font-weight: 600; font-size: 14px; color: white; cursor: pointer; transition: all 0.2s; white-space: nowrap; box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);">
+                        <?php _e('Apply', 'crscngres'); ?>
+                    </button>
+                </div>
+                
+                <!-- Message Area -->
+                <div id="coupon-message" class="crs-coupon-message" style="display: none; margin-top: 12px; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500;"></div>
+                
+                <!-- Applied Coupon Details -->
+                <div id="coupon-details" class="crs-coupon-details" 
+                    style="<?php echo $applied_coupon ? 'display: flex;' : 'display: none;'; ?> margin-top: 16px; padding: 14px 18px; background: #f0f9ff; border: 1px solid #b9e0f7; border-radius: 12px; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    
+                    <div style="display: flex; align-items: center; gap: 8px; background: white; padding: 6px 14px; border-radius: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <span style="color: #10b981; font-size: 14px;">✓</span>
+                        <span style="color: #0369a1; font-size: 13px; font-weight: 500;"><?php _e('Applied', 'crscngres'); ?></span>
+                    </div>
+                    
+                        <div style="display: flex; justify-content: space-between; margin: 12px 0; ">
+                            <span class="crs-coupon-code" style="color: black; font-size: 14px; font-weight: 700; letter-spacing: 0.5px;">
+                                Saved
+                            </span>
+                            
+                            <span id="coupon-type-badge" style=" color: black;font-size: 14px; font-weight: 600;">
+                                <?php 
+                                if ($applied_coupon) {
+                                    if ($applied_coupon->discount_type === 'percentage') {
+                                        echo $applied_coupon->discount_value . '% OFF';
+                                    } else {
+                                        echo '€' . $applied_coupon->discount_value . ' OFF';
+                                    }
+                                }
+                                ?>
+                            </span>
+                        </div>
+                    
+
+                    
+                    <button type="button" id="remove-coupon" 
+                            style="margin-left: auto; background: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 20px; cursor: pointer; color: #64748b; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.1);"
+                            onmouseover="this.style.background='#fee2e2'; this.style.color='#dc2626'; this.style.transform='scale(1.05)'" 
+                            onmouseout="this.style.background='white'; this.style.color='#64748b'; this.style.transform='scale(1)'">
+                        ×
+                    </button>
+                </div>
+
+
+
+
+
+
+
+
+
+
+                
+            </div>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                <!-- Economic Summary Card -->
                 <div class="crs-economic-card" style="background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                     <h3 class="crs-card-title" style="font-size: 18px; font-weight: 600; color: #0f172a; margin: 0 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid #2271b1; display: flex; align-items: center; gap: 8px;">
@@ -625,17 +689,44 @@ private static function getStep8Html($congress_id, $data) {
                             <span class="crs-economic-value" id="hotel-price" style="color: #0f172a; font-weight: 600;"><?php printf(__('€%s', 'crscngres'), number_format($hotel_total, 0)); ?></span>
                         </div>
                         <?php endif; ?>
+
+                    <!-- Discount Row (shown only when coupon applied) -->
+                    <div class="crs-economic-row crs-economic-discount" id="discount-row" 
+                        style="display: <?php echo $discount_amount > 0 ? 'flex' : 'none'; ?>; justify-content: space-between; align-items: center; padding: 12px ; background: linear-gradient(135deg, #fef9e8 0%, #fff5e6 100%); border-radius: 10px; margin: 8px 0; border: 1px solid #ffe4b5;">
                         
-                        <!-- Discount Row (shown only when coupon applied) -->
-                        <div class="crs-economic-row crs-economic-discount" id="discount-row" 
-                            style="display: <?php echo $discount_amount > 0 ? 'flex' : 'none'; ?>; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; background: #f0f9ff; margin-top: 5px; border-radius: 6px;">
-                            <span class="crs-economic-label" style="color: #059669; font-weight: 600; display: flex; align-items: center; gap: 5px;">
-                                <span style="font-size: 16px;">🏷️</span>
-                                <?php _e('Discount', 'crscngres'); ?>
-                            </span>
-                            <span class="crs-economic-value" id="discount-amount" style="color: #059669; font-weight: 700;">-€<?php echo number_format($discount_amount, 0); ?></span>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="background: #f59e0b; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <span style="font-size: 14px; color: white;">🏷️</span>
+                            </div>
+                            <div>
+                                <span style="color: #1e293b; font-weight: 600; font-size: 14px;"><?php _e('Discount', 'crscngres'); ?></span>
+                                <?php if ($applied_coupon): ?>
+                                <span style="margin-left: 10px; background: #f59e0b; color: white; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;">
+                                    <?php 
+                                    if ($applied_coupon->discount_type === 'percentage') {
+                                        echo $applied_coupon->discount_value . '% OFF';
+                                    } else {
+                                        echo '€' . $applied_coupon->discount_value . ' OFF';
+                                    }
+                                    ?>
+                                </span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <span style="color: #059669; font-weight: 500; font-size: 12px;">SAVED</span>
+                            <span id="discount-amount" style="color: #059669; font-weight: 800; font-size: 18px;">
+                                -€<?php echo number_format($discount_amount, 0); ?>
+                            </span>
+                        </div>
+                    </div>
+                        
+
+
+
+
+
                         <!-- Total Row -->
                         <div class="crs-economic-row crs-economic-total" style="display: flex; justify-content: space-between; padding: 15px 0 5px 0; margin-top: 5px; border-top: 2px solid #2271b1;">
                             <span class="crs-economic-label" style="color: #0f172a; font-weight: 700; font-size: 16px;"><?php _e('Total', 'crscngres'); ?></span>
@@ -695,8 +786,102 @@ private static function getStep8Html($congress_id, $data) {
 
     
 <style>
+/* Coupon Section Styles */
+.crs-coupon-container {
+    transition: all 0.2s ease;
+}
+
+.crs-coupon-container:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.crs-input:focus {
+    outline: none;
+    border-color: #4f46e5 !important;
+    background: white !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+#apply-coupon:hover {
+    background: #4338ca !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
+}
+
+#apply-coupon:active {
+    transform: translateY(0);
+}
+
+/* Message styles */
+.crs-coupon-message.success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #b8e6b9;
+}
+
+.crs-coupon-message.error {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #f5b9b9;
+}
+
+/* Coupon details animation */
+@keyframes couponSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#coupon-details {
+    animation: couponSlideIn 0.3s ease-out;
+}
+
+/* Discount row animation */
+@keyframes discountPulse {
+    0% { background: #fef9e8; }
+    50% { background: #fff0d6; }
+    100% { background: #fef9e8; }
+}
+
+.crs-economic-discount {
+    animation: discountPulse 2s ease-in-out infinite;
+}
 
 /* Responsive Styles */
+@media (max-width: 640px) {
+    .crs-coupon-input-group {
+        flex-direction: column;
+        gap: 10px !important;
+    }
+    
+    .crs-coupon-input-group button {
+        width: 100%;
+    }
+    
+    .crs-coupon-details {
+        flex-direction: column;
+        align-items: flex-start !important;
+    }
+    
+    #remove-coupon {
+        margin-left: 0 !important;
+        width: 100%;
+        border-radius: 30px !important;
+        height: 38px !important;
+    }
+    
+    .crs-economic-discount {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+}
+
 @media (max-width: 768px) {
     .crs-economic-card {
         padding: 15px !important;
@@ -723,16 +908,6 @@ private static function getStep8Html($congress_id, $data) {
     transition: background 0.2s;
 }
 
-/* Animation for discount row */
-@keyframes discountPulse {
-    0% { background: #f0f9ff; }
-    50% { background: #dbeafe; }
-    100% { background: #f0f9ff; }
-}
-
-.crs-economic-discount {
-    animation: discountPulse 2s infinite;
-}
 /* Input focus effect */
 .crs-input:focus {
     outline: none;
@@ -740,69 +915,10 @@ private static function getStep8Html($congress_id, $data) {
     background: white !important;
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
-
-/* Button hover effect */
-#apply-coupon:hover {
-    background: #4338ca !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
-}
-
-#apply-coupon:active {
-    transform: translateY(0);
-}
-
-/* Message styles */
-.crs-coupon-message.success {
-    background: #f0fdf4;
-    color: #166534;
-    border: 1px solid #86efac;
-}
-
-.crs-coupon-message.error {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-}
-
-/* Responsive design */
-@media (max-width: 640px) {
-    .crs-coupon-input-group {
-        flex-direction: column;
-        gap: 10px !important;
-    }
-    
-    .crs-coupon-input-group button {
-        width: 100%;
-    }
-    
-    .crs-coupon-details {
-        flex-direction: column;
-        align-items: flex-start !important;
-    }
-    
-    .crs-coupon-remove {
-        margin-left: 0 !important;
-        align-self: flex-end;
-    }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
-    .crs-coupon-input-group {
-        flex-wrap: wrap;
-    }
-    
-    .crs-coupon-input-group input {
-        min-width: 250px;
-    }
-}
-.crs-option-card.coupon-section.selected {
-    display: block !important;
-}
 </style>
 
-    <!-- Coupon JavaScript -->
-    <script>
+<!-- Coupon JavaScript -->
+<script>
     jQuery(document).ready(function($) {
         let originalSubtotal = <?php echo $subtotal; ?>;
         let currentTotal = <?php echo $total; ?>;
@@ -816,7 +932,16 @@ private static function getStep8Html($congress_id, $data) {
                 return;
             }
             
+            // Check if same coupon is already applied
+            if (window.currentAppliedCoupon && window.currentAppliedCoupon.code === code) {
+                showCouponMessage('This coupon is already applied', 'error');
+                return;
+            }
+            
             $(this).prop('disabled', true).text('Applying...');
+            
+            console.log('Applying coupon:', code);
+            console.log('Original subtotal:', originalSubtotal);
             
             $.ajax({
                 url: crs_ajax.ajax_url,
@@ -828,15 +953,26 @@ private static function getStep8Html($congress_id, $data) {
                     nonce: crs_ajax.nonce
                 },
                 success: function(response) {
+                    console.log('Coupon response:', response);
+                    
                     if (response.success) {
+                        // First, reset any existing coupon
+                        if (window.currentAppliedCoupon) {
+                            console.log('Removing existing coupon before applying new one');
+                            resetCoupon();
+                        }
+                        
+                        // Then apply the new coupon
                         applyCoupon(response.data);
                         showCouponMessage('Coupon applied successfully!', 'success');
                     } else {
+                        console.log('Coupon error:', response.data);
                         showCouponMessage(response.data.message || 'Invalid coupon', 'error');
-                        resetCoupon();
+                        // Don't reset if coupon is invalid - keep existing if any
                     }
                 },
-                error: function() {
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', error);
                     showCouponMessage('Failed to validate coupon', 'error');
                 },
                 complete: function() {
@@ -847,55 +983,155 @@ private static function getStep8Html($congress_id, $data) {
         
         // Remove coupon
         $('#remove-coupon').on('click', function() {
-            resetCoupon();
-            $('#coupon_code').val('').focus();
-            showCouponMessage('Coupon removed', 'success');
+            if (window.currentAppliedCoupon) {
+                console.log('Removing coupon:', window.currentAppliedCoupon.code);
+                resetCoupon();
+                showCouponMessage('Coupon removed', 'success');
+            } else {
+                // Force reset even if no global tracking
+                resetCoupon();
+                showCouponMessage('Coupon removed', 'success');
+            }
         });
         
-        // Apply coupon data to UI
-        function applyCoupon(data) {
-            currentDiscount = data.discount;
-            currentTotal = data.final_amount;
-            
-            // Update discount row
-            $('#discount-row').show();
-            $('#discount-amount').text('-€' + data.discount.toFixed(0));
-            $('#total-amount').text('€' + data.final_amount.toFixed(0));
-            
-            // Update hidden fields
-            $('#applied_coupon_id').val(data.coupon.id);
-            $('#applied_coupon_code').val(data.coupon.code);
-            $('#discount_amount').val(data.discount);
-            $('#final_amount').val(data.final_amount);
-            
-            // Update coupon details display
-            $('#coupon-details').show();
-            $('.crs-coupon-code').text(data.coupon.code);
-            $('.crs-coupon-discount').text('-€' + data.discount.toFixed(0));
-            
-            // Update pay button
-            $('.crs-pay-button').text('Pay €' + data.final_amount.toFixed(0));
-            $('.crs-pay-button').data('total', data.final_amount);
+        // Apply coupon data to UI (FIXED - with correct property names)
+   // Apply coupon data to UI
+function applyCoupon(data) {
+    currentDiscount = data.discount;
+    currentTotal = data.final_amount;
+    
+    // Create type badge text
+    let typeBadgeText = '';
+    if (data.coupon.discount_type === 'percentage') {
+        typeBadgeText = data.coupon.discount_value + '% OFF';
+    } else {
+        typeBadgeText = '€' + data.coupon.discount_value + ' OFF';
+    }
+    
+    // Update discount row
+    $('#discount-row').show();
+    $('#discount-amount').text('-€' + data.discount.toFixed(0));
+    $('#total-amount').text('€' + data.final_amount.toFixed(0));
+    
+    // Update discount row badge
+    $('#discount-row .crs-coupon-type-badge').text(typeBadgeText);
+    
+    // Update hidden fields
+    $('#applied_coupon_id').val(data.coupon.id);
+    $('#applied_coupon_code').val(data.coupon.code);
+    $('#discount_amount').val(data.discount);
+    $('#final_amount').val(data.final_amount);
+    
+    // Update coupon details
+    $('#coupon-details').show();
+    $('.crs-coupon-code').text(data.coupon.code);
+    $('#coupon-type-badge').text(typeBadgeText);
+    $('.crs-coupon-discount').text('-€' + data.discount.toFixed(0));
+    
+    // Update pay button
+    $('.crs-pay-button').text('Pay €' + data.final_amount.toFixed(0));
+    $('.crs-pay-button').data('total', data.final_amount);
+    
+    // Update coupon code input
+    $('#coupon_code').val(data.coupon.code);
+    
+    // ========== IMPORTANT: Clear old coupon data from formData ==========
+    // Remove any existing coupon data first
+    if (typeof formData !== 'undefined') {
+        // Clear old coupon data
+        delete formData.applied_coupon_code;
+        delete formData.applied_coupon_id;
+        delete formData.discount_amount;
+        delete formData.discount_type;
+        delete formData.discount_value;
+        
+        // Set new coupon data
+        formData.applied_coupon_code = data.coupon.code;
+        formData.applied_coupon_id = data.coupon.id;
+        formData.discount_amount = data.discount;
+        formData.final_amount = data.final_amount;
+        formData.subtotal_amount = originalSubtotal;
+        formData.discount_type = data.coupon.discount_type;
+        formData.discount_value = data.coupon.discount_value;
+        
+        // Save to localStorage
+        if (typeof saveToLocalStorage === 'function') {
+            saveToLocalStorage();
         }
         
-        // Reset coupon
-        function resetCoupon() {
-            currentDiscount = 0;
-            currentTotal = originalSubtotal;
+        console.log('FormData updated with new coupon:', formData);
+    }
+    
+    // Store current coupon in a global variable for tracking
+    window.currentAppliedCoupon = {
+        code: data.coupon.code,
+        id: data.coupon.id,
+        discount: data.discount,
+        final_amount: data.final_amount,
+        type: data.coupon.discount_type,
+        value: data.coupon.discount_value
+    };
+}
+
+    // Reset coupon - COMPLETELY REMOVE ALL COUPON DATA
+    function resetCoupon() {
+        currentDiscount = 0;
+        currentTotal = originalSubtotal;
+        
+        // Hide discount row and remove type badge
+        $('#discount-row').hide();
+        $('#discount-row .crs-coupon-type-badge').remove();
+        $('#total-amount').text('€' + originalSubtotal.toFixed(0));
+        
+        // ========== CRITICAL: Clear ALL hidden fields ==========
+        $('#applied_coupon_id').val('');
+        $('#applied_coupon_code').val('');
+        $('#discount_amount').val('0');
+        $('#final_amount').val(originalSubtotal);
+        $('#subtotal_amount').val(originalSubtotal);
+        
+        // Hide coupon details
+        $('#coupon-details').hide();
+        
+        // Reset pay button
+        $('.crs-pay-button').text('Pay €' + originalSubtotal.toFixed(0));
+        $('.crs-pay-button').data('total', originalSubtotal);
+        
+        // Clear coupon code input
+        $('#coupon_code').val('');
+        
+        // ========== IMPORTANT: COMPLETELY REMOVE coupon data from formData ==========
+        if (typeof formData !== 'undefined') {
+            // Delete all coupon related data
+            delete formData.applied_coupon_code;
+            delete formData.applied_coupon_id;
+            delete formData.discount_amount;
+            delete formData.discount_type;
+            delete formData.discount_value;
             
-            $('#discount-row').hide();
-            $('#total-amount').text('€' + originalSubtotal.toFixed(0));
+            // Reset amounts
+            formData.final_amount = originalSubtotal;
+            formData.subtotal_amount = originalSubtotal;
             
-            $('#applied_coupon_id').val('');
-            $('#applied_coupon_code').val('');
-            $('#discount_amount').val('0');
-            $('#final_amount').val(originalSubtotal);
+            // Save to localStorage
+            if (typeof saveToLocalStorage === 'function') {
+                saveToLocalStorage();
+            }
             
-            $('#coupon-details').hide();
-            
-            $('.crs-pay-button').text('Pay €' + originalSubtotal.toFixed(0));
-            $('.crs-pay-button').data('total', originalSubtotal);
+            console.log('FormData after reset - coupon data removed:', formData);
         }
+        
+        // Clear global coupon tracking
+        window.currentAppliedCoupon = null;
+        
+        console.log('Coupon removed, total reset to:', originalSubtotal);
+    }
+
+
+
+
+
+
         
         // Show message
         function showCouponMessage(text, type) {
@@ -924,7 +1160,9 @@ private static function getStep8Html($congress_id, $data) {
             }
         });
     });
-    </script>
+</script>
+
+
     <?php
     return ob_get_clean();
 }

@@ -122,12 +122,21 @@ class CRS_Payment {
         
         // Apply coupon discount if exists
         $total = $subtotal;
-        if (!empty($data['applied_coupon_code']) && !empty($data['applied_coupon_id'])) {
+        
+        // Check for coupon in data
+        $coupon_code = '';
+        if (!empty($data['applied_coupon_code'])) {
+            $coupon_code = $data['applied_coupon_code'];
+        } elseif (!empty($data['coupon_code'])) {
+            $coupon_code = $data['coupon_code'];
+        }
+        
+        if (!empty($coupon_code)) {
             if (!class_exists('CRS_Coupon')) {
                 require_once CRS_PLUGIN_DIR . 'includes/class-crs-coupon.php';
             }
             $coupon_obj = new CRS_Coupon();
-            $result = $coupon_obj->validate_coupon($data['applied_coupon_code'], $subtotal, get_current_user_id());
+            $result = $coupon_obj->validate_coupon($coupon_code, $subtotal, get_current_user_id());
             
             if ($result['valid']) {
                 $total = $result['final_amount'];
@@ -168,6 +177,9 @@ class CRS_Payment {
             \Stripe\Stripe::setApiKey($keys['secret']);
             $currency = strtolower(get_option('crs_currency', 'EUR'));
             
+            // Log the amount being sent to Stripe
+            error_log('CRS: Creating Stripe Payment Intent - Amount: ' . round($total * 100) . ' ' . $currency . ', User: ' . $user_id);
+            
             $temp_booking_id = self::storeTempBookingData($user_id, $data, $proof_file_id, $proof_file_url, $proof_file_name);
             
             $intent = \Stripe\PaymentIntent::create([
@@ -185,9 +197,11 @@ class CRS_Payment {
                 'clientSecret' => $intent->client_secret,
                 'intentId' => $intent->id,
                 'temp_booking_id' => $temp_booking_id,
-                'publishableKey' => $keys['publishable']
+                'publishableKey' => $keys['publishable'],
+                'amount' => $total
             ]];
         } catch (Exception $e) {
+            error_log('CRS: Stripe Payment Intent Error - ' . $e->getMessage());
             return ['success' => false, 'error' => 'Stripe error: ' . $e->getMessage()];
         }
     }
@@ -259,128 +273,133 @@ class CRS_Payment {
         }
     }
     
-    public static function createBookingAfterPayment($data, $intent_id, $proof_file_id, $proof_file_url, $proof_file_name, $user_id) {
-        global $wpdb;
-        $bookings_table = $wpdb->prefix . 'cr_bookings';
-
-        // Check if third person user ID is provided
-        if (isset($data['third_person_user_id']) && !empty($data['third_person_user_id'])) {
-            $user_id = intval($data['third_person_user_id']);
-            error_log('CRS: createBookingAfterPayment using third person user ID: ' . $user_id);
-        }
-        
-        $total = self::calculateTotal($data);
-        
-        // Calculate subtotal for record keeping
-        $subtotal = $total;
-        $discount_amount = 0;
-        $applied_coupon_id = null;
-        
-        if (!empty($data['applied_coupon_code']) && !empty($data['applied_coupon_id'])) {
-            $applied_coupon_id = intval($data['applied_coupon_id']);
-            $discount_amount = floatval($data['discount_amount'] ?? 0);
-            $subtotal = floatval($data['subtotal_amount'] ?? $total);
-        }
-        
-        $booking_number = 'CR-' . time() . '-' . $user_id;
-        
-        $meal_preferences = !empty($data['meals']) ? json_encode($data['meals']) : '';
-        $workshop_ids = !empty($data['workshops']) ? json_encode($data['workshops']) : '';
-        
-        if (!empty($data['workshops']) && !empty($data['congress_id'])) {
-            self::decreaseWorkshopSeats($data['congress_id'], $data['workshops']);
-        }
-        
-        $diet_value = [];
-        if (isset($data['diet'])) {
-            $diet_value = is_array($data['diet']) ? $data['diet'] : (is_string($data['diet']) ? [$data['diet']] : []);
-        }
-        
-        $allergy_value = 'no';
-        if (isset($data['allergy'])) {
-            $allergy_value = is_array($data['allergy']) ? (in_array('yes', $data['allergy']) ? 'yes' : 'no') : $data['allergy'];
-        }
-        
-        $booking_data = [
-            'booking_number' => $booking_number,
-            'user_id' => $user_id,
-            'congress_id' => intval($data['congress_id'] ?? 0),
-            'registration_type' => sanitize_text_field($data['registration_type'] ?? 'personal'),
-            'third_person_name' => sanitize_text_field($data['third_person_name'] ?? ''),
-            'third_person_email' => sanitize_email($data['third_person_email'] ?? ''),
-            'selected_hotel_id' => intval($data['hotel_id'] ?? 0),
-            'check_in_date' => sanitize_text_field($data['check_in_date'] ?? ''),
-            'check_out_date' => sanitize_text_field($data['check_out_date'] ?? ''),
-            'meal_preferences' => $meal_preferences,
-            'workshop_ids' => $workshop_ids,
-            'total_amount' => floatval($total),
-            'booking_status' => 'completed',
-            'payment_status' => 'completed',
-            'created_at' => current_time('mysql')
-        ];
-        
-        $additional_options = [
-            'personal_data' => [
-                'first_name' => sanitize_text_field($data['first_name'] ?? ''),
-                'last_name' => sanitize_text_field($data['last_name'] ?? ''),
-                'id_number' => sanitize_text_field($data['id_number'] ?? ''),
-                'phone' => sanitize_text_field($data['phone'] ?? ''),
-                'address' => sanitize_text_field($data['address'] ?? ''),
-                'location' => sanitize_text_field($data['location'] ?? ''),
-                'postal_code' => sanitize_text_field($data['postal_code'] ?? ''),
-                'country' => sanitize_text_field($data['country'] ?? ''),
-                'province' => sanitize_text_field($data['province'] ?? ''),
-                'work_center' => sanitize_text_field($data['work_center'] ?? ''),
-                'email' => sanitize_email($data['email'] ?? '')
-            ],
-            'dietary_info' => [
-                'diet' => $diet_value,
-                'diet_other' => sanitize_text_field($data['diet_other'] ?? ''),
-                'allergy' => $allergy_value,
-                'allergy_details' => sanitize_textarea_field($data['allergy_details'] ?? '')
-            ],
-            'other_details' => [
-                'image_release' => !empty($data['image_release']) ? 1 : 0,
-                'observations' => sanitize_textarea_field($data['observations'] ?? ''),
-                'free_communication' => sanitize_text_field($data['free_communication'] ?? '')
-            ],
-            'invoice_request' => !empty($data['request_invoice']) ? 1 : 0,
-            'company_details' => [
-                'company_name' => sanitize_text_field($data['company_name'] ?? ''),
-                'tax_address' => sanitize_text_field($data['tax_address'] ?? ''),
-                'cif' => sanitize_text_field($data['cif'] ?? ''),
-                'invoice_phone' => sanitize_text_field($data['invoice_phone'] ?? ''),
-                'invoice_email' => sanitize_email($data['invoice_email'] ?? '')
-            ],
-            'proof_file_id' => $proof_file_id,
-            'proof_file_url' => $proof_file_url,
-            'proof_file_name' => $proof_file_name,
-            'registration_type_id' => sanitize_text_field($data['registration_type_id'] ?? ''),
-            'add_sidi' => !empty($data['add_sidi']) ? 1 : 0,
-            'accept_terms' => !empty($data['accept_terms']) ? 1 : 0,
-            'stripe_payment_intent' => $intent_id,
-            // New coupon fields
-            'applied_coupon_id' => $applied_coupon_id,
-            'applied_coupon_code' => sanitize_text_field($data['applied_coupon_code'] ?? ''),
-            'subtotal_amount' => $subtotal,
-            'discount_amount' => $discount_amount
-        ];
-        
-        $booking_data['additional_options'] = json_encode($additional_options);
-        
-        $result = $wpdb->insert($bookings_table, $booking_data);
-        
-        // Record coupon usage if coupon was applied
-        if ($result && $applied_coupon_id && $discount_amount > 0) {
-            if (!class_exists('CRS_Coupon')) {
-                require_once CRS_PLUGIN_DIR . 'includes/class-crs-coupon.php';
-            }
-            $coupon_obj = new CRS_Coupon();
-            $coupon_obj->record_usage($applied_coupon_id, $wpdb->insert_id, $user_id, $discount_amount, $subtotal);
-        }
-        
-        return $result ? $wpdb->insert_id : false;
+public static function createBookingAfterPayment($data, $intent_id, $proof_file_id, $proof_file_url, $proof_file_name, $user_id) {
+    global $wpdb;
+    $bookings_table = $wpdb->prefix . 'cr_bookings';
+    
+    $total = self::calculateTotal($data);
+    
+    // Calculate subtotal for record keeping
+    $subtotal = $total;
+    $discount_amount = 0;
+    $applied_coupon_id = null;
+    
+    if (!empty($data['applied_coupon_code']) && !empty($data['applied_coupon_id'])) {
+        $applied_coupon_id = intval($data['applied_coupon_id']);
+        $discount_amount = floatval($data['discount_amount'] ?? 0);
+        $subtotal = floatval($data['subtotal_amount'] ?? $total);
     }
+    
+    $booking_number = 'CR-' . time() . '-' . $user_id;
+    
+    error_log('CRS: Creating booking - Number: ' . $booking_number . ', User: ' . $user_id . ', Total: ' . $total);
+    
+    $meal_preferences = !empty($data['meals']) ? json_encode($data['meals']) : '';
+    $workshop_ids = !empty($data['workshops']) ? json_encode($data['workshops']) : '';
+    
+    if (!empty($data['workshops']) && !empty($data['congress_id'])) {
+        self::decreaseWorkshopSeats($data['congress_id'], $data['workshops']);
+    }
+    
+    $diet_value = [];
+    if (isset($data['diet'])) {
+        $diet_value = is_array($data['diet']) ? $data['diet'] : (is_string($data['diet']) ? [$data['diet']] : []);
+    }
+    
+    $allergy_value = 'no';
+    if (isset($data['allergy'])) {
+        $allergy_value = is_array($data['allergy']) ? (in_array('yes', $data['allergy']) ? 'yes' : 'no') : $data['allergy'];
+    }
+    
+    $booking_data = [
+        'booking_number' => $booking_number,
+        'user_id' => $user_id,
+        'congress_id' => intval($data['congress_id'] ?? 0),
+        'registration_type' => sanitize_text_field($data['registration_type'] ?? 'personal'),
+        'third_person_name' => sanitize_text_field($data['third_person_name'] ?? ''),
+        'third_person_email' => sanitize_email($data['third_person_email'] ?? ''),
+        'selected_hotel_id' => intval($data['hotel_id'] ?? 0),
+        'check_in_date' => sanitize_text_field($data['check_in_date'] ?? ''),
+        'check_out_date' => sanitize_text_field($data['check_out_date'] ?? ''),
+        'meal_preferences' => $meal_preferences,
+        'workshop_ids' => $workshop_ids,
+        'total_amount' => floatval($total),
+        'booking_status' => 'completed',
+        'payment_status' => 'completed',
+        'created_at' => current_time('mysql')
+    ];
+    
+    $additional_options = [
+        'personal_data' => [
+            'first_name' => sanitize_text_field($data['first_name'] ?? ''),
+            'last_name' => sanitize_text_field($data['last_name'] ?? ''),
+            'id_number' => sanitize_text_field($data['id_number'] ?? ''),
+            'phone' => sanitize_text_field($data['phone'] ?? ''),
+            'address' => sanitize_text_field($data['address'] ?? ''),
+            'location' => sanitize_text_field($data['location'] ?? ''),
+            'postal_code' => sanitize_text_field($data['postal_code'] ?? ''),
+            'country' => sanitize_text_field($data['country'] ?? ''),
+            'province' => sanitize_text_field($data['province'] ?? ''),
+            'work_center' => sanitize_text_field($data['work_center'] ?? ''),
+            'email' => sanitize_email($data['email'] ?? '')
+        ],
+        'dietary_info' => [
+            'diet' => $diet_value,
+            'diet_other' => sanitize_text_field($data['diet_other'] ?? ''),
+            'allergy' => $allergy_value,
+            'allergy_details' => sanitize_textarea_field($data['allergy_details'] ?? '')
+        ],
+        'other_details' => [
+            'image_release' => !empty($data['image_release']) ? 1 : 0,
+            'observations' => sanitize_textarea_field($data['observations'] ?? ''),
+            'free_communication' => sanitize_text_field($data['free_communication'] ?? '')
+        ],
+        'invoice_request' => !empty($data['request_invoice']) ? 1 : 0,
+        'company_details' => [
+            'company_name' => sanitize_text_field($data['company_name'] ?? ''),
+            'tax_address' => sanitize_text_field($data['tax_address'] ?? ''),
+            'cif' => sanitize_text_field($data['cif'] ?? ''),
+            'invoice_phone' => sanitize_text_field($data['invoice_phone'] ?? ''),
+            'invoice_email' => sanitize_email($data['invoice_email'] ?? '')
+        ],
+        'proof_file_id' => $proof_file_id,
+        'proof_file_url' => $proof_file_url,
+        'proof_file_name' => $proof_file_name,
+        'registration_type_id' => sanitize_text_field($data['registration_type_id'] ?? ''),
+        'add_sidi' => !empty($data['add_sidi']) ? 1 : 0,
+        'accept_terms' => !empty($data['accept_terms']) ? 1 : 0,
+        'stripe_payment_intent' => $intent_id,
+        'applied_coupon_id' => $applied_coupon_id,
+        'applied_coupon_code' => sanitize_text_field($data['applied_coupon_code'] ?? ''),
+        'subtotal_amount' => $subtotal,
+        'discount_amount' => $discount_amount
+    ];
+    
+    $booking_data['additional_options'] = json_encode($additional_options);
+    
+    // Insert booking
+    $result = $wpdb->insert($bookings_table, $booking_data);
+    
+    if (!$result) {
+        error_log('CRS: Database insert failed - ' . $wpdb->last_error);
+        return false;
+    }
+    
+    $new_booking_id = $wpdb->insert_id;
+    error_log('CRS: Booking created successfully with ID: ' . $new_booking_id);
+    
+    // Record coupon usage if coupon was applied
+    if ($new_booking_id && $applied_coupon_id && $discount_amount > 0) {
+        if (!class_exists('CRS_Coupon')) {
+            require_once CRS_PLUGIN_DIR . 'includes/class-crs-coupon.php';
+        }
+        $coupon_obj = new CRS_Coupon();
+        $coupon_obj->record_usage($applied_coupon_id, $new_booking_id, $user_id, $discount_amount, $subtotal);
+        error_log('CRS: Coupon usage recorded - Coupon ID: ' . $applied_coupon_id . ', Booking ID: ' . $new_booking_id);
+    }
+    
+    return $new_booking_id;
+}
     
     private static function decreaseWorkshopSeats($congress_id, $selected_workshops) {
         $workshops = get_post_meta($congress_id, 'congress_workshop', true);

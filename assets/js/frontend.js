@@ -256,17 +256,66 @@
 
   // frontend.js এর createStripePaymentIntent function আপডেট করুন
   function createStripePaymentIntent($btn) {
+    // ========== CRITICAL: Make sure we're using the latest formData ==========
+    // First, collect current UI data to ensure we have the latest values
+    const currentCouponCode = $("#applied_coupon_code").val();
+    const currentFinalAmount = $("#final_amount").val();
+    const currentDiscountAmount = $("#discount_amount").val();
+    const currentSubtotal = $("#subtotal_amount").val();
+
+    console.log("Creating payment intent with latest data:");
+    console.log("Current coupon code from hidden field:", currentCouponCode);
+    console.log("Current final amount:", currentFinalAmount);
+    console.log("Current discount amount:", currentDiscountAmount);
+    console.log("Current subtotal:", currentSubtotal);
+
+    // Update formData with latest values from UI
+    if (currentCouponCode && currentCouponCode !== "") {
+      formData.applied_coupon_code = currentCouponCode;
+      formData.applied_coupon_id = $("#applied_coupon_id").val();
+      formData.discount_amount = parseFloat(currentDiscountAmount);
+      formData.final_amount = parseFloat(currentFinalAmount);
+      formData.subtotal_amount = parseFloat(currentSubtotal);
+
+      // Also get discount type and value from the displayed badge
+      const typeBadgeText = $("#coupon-type-badge").text();
+      if (typeBadgeText) {
+        if (typeBadgeText.includes("%")) {
+          formData.discount_type = "percentage";
+          formData.discount_value = parseFloat(
+            typeBadgeText.replace("% OFF", ""),
+          );
+        } else if (typeBadgeText.includes("€")) {
+          formData.discount_type = "fixed";
+          formData.discount_value = parseFloat(
+            typeBadgeText.replace("€", "").replace(" OFF", ""),
+          );
+        }
+      }
+
+      console.log("Updated formData with coupon:", {
+        applied_coupon_code: formData.applied_coupon_code,
+        discount_amount: formData.discount_amount,
+        final_amount: formData.final_amount,
+      });
+    } else {
+      // No coupon applied - clear any existing coupon data
+      delete formData.applied_coupon_code;
+      delete formData.applied_coupon_id;
+      delete formData.discount_amount;
+      delete formData.discount_type;
+      delete formData.discount_value;
+      formData.final_amount = parseFloat(currentSubtotal) || originalSubtotal;
+      formData.subtotal_amount =
+        parseFloat(currentSubtotal) || originalSubtotal;
+
+      console.log("No coupon applied, formData cleared");
+    }
+
     var formDataObj = new FormData();
     formDataObj.append("action", "crs_create_stripe_payment_intent");
     formDataObj.append("nonce", crs_ajax.nonce);
     formDataObj.append("data", JSON.stringify(formData));
-
-    // IMPORTANT: Check for third person data in formData
-    if (formData.registration_type === "third_person") {
-      console.log("Third person registration detected");
-      console.log("Third person name:", formData.third_person_name);
-      console.log("Third person email:", formData.third_person_email);
-    }
 
     // Check sessionStorage for file data
     var proofFileData = sessionStorage.getItem("crs_proof_file_data");
@@ -277,11 +326,15 @@
       formDataObj.append("proof_file_name", proofFileName);
     }
 
-    // Debug log
+    // Debug log - what's being sent to server
     console.log("Sending data for payment intent:", {
       registration_type: formData.registration_type,
-      third_person_name: formData.third_person_name,
-      third_person_email: formData.third_person_email,
+      applied_coupon_code: formData.applied_coupon_code,
+      discount_amount: formData.discount_amount,
+      final_amount: formData.final_amount,
+      subtotal_amount: formData.subtotal_amount,
+      discount_type: formData.discount_type,
+      discount_value: formData.discount_value,
     });
 
     $.ajax({
@@ -293,7 +346,10 @@
       timeout: 30000,
       success: function (response) {
         if (response.success) {
-          console.log("Payment intent created successfully");
+          console.log(
+            "Payment intent created successfully with amount:",
+            response.data.amount,
+          );
           clearLocalStorage();
           showStripePaymentForm(
             response.data.temp_booking_id,
