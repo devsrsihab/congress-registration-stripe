@@ -1,0 +1,1757 @@
+.crs-step-content {
+  max-width: 100%;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+}
+
+.crs-step-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.crs-step-description {
+  font-size: 16px;
+  color: #4a5568;
+  margin: 0 0 32px 0;
+  line-height: 1.5;
+}
+
+/* Options Container */
+.crs-options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .crs-options-container {
+    flex-direction: row;
+    gap: 20px;
+  }
+}
+
+/* Option Card */
+.crs-option-card {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  padding: 24px;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.crs-option-card:hover {
+  border-color: #3182ce;
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.1);
+}
+
+.crs-option-card.selected {
+  border-color: #3182ce;
+  background: #ebf8ff;
+}
+
+.crs-option-icon {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background-color: hsl(210 15% 95%);
+  color: black;
+  padding: 12px;
+}
+
+.crs-option-card.selected .crs-option-icon {
+  background-color: hsl(215 80% 45%);
+  color: white;
+}
+
+.crs-option-icon svg {
+  width: 32px;
+  height: 32px;
+}
+
+.crs-option-content {
+  flex: 1;
+  text-align: left;
+}
+
+.crs-option-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 4px 0;
+}
+
+.crs-option-subtitle {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Third Person Fields */
+.crs-third-person-fields {
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.crs-form-group {
+  margin-bottom: 20px;
+}
+
+.crs-form-group:last-child {
+  margin-bottom: 0;
+}
+
+.crs-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a202c;
+  margin-bottom: 6px;
+}
+
+.crs-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #1a202c;
+  transition: all 0.2s ease;
+}
+
+.crs-input:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+.crs-field-note {
+  font-size: 12px;
+  color: #718096;
+  margin: 4px 0 0 0;
+}
+
+/* Note Box */
+.crs-note-box {
+  background: #fef3c7;
+  border-left: 4px solid #d97706;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.crs-note-text {
+  font-size: 14px;
+  color: #1a202c;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.crs-note-text strong {
+  font-weight: 600;
+  color: #b45309;
+}
+
+/* Personal Message - Hidden by default */
+.crs-personal-message {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .crs-step-title {
+    font-size: 24px;
+  }
+
+  .crs-step-description {
+    margin-bottom: 24px;
+  }
+
+  .crs-option-card {
+    padding: 20px;
+  }
+
+  .crs-option-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .crs-option-title {
+    font-size: 16px;
+  }
+
+  .crs-option-subtitle {
+    font-size: 13px;
+  }
+
+  .crs-third-person-fields {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .crs-option-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .crs-option-icon {
+    margin-bottom: 8px;
+  }
+}
+
+/*===============================================
+            Form Styles for step 3
+===============================================
+*/
+
+/* Step Title */
+.crs-step-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.crs-step-description {
+  font-size: 16px;
+  color: #666666;
+  margin: 0 0 24px 0;
+}
+
+/* Registration Types Container */
+.crs-registration-types {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  background: #ffffff;
+}
+
+/* Individual Option */
+.crs-registration-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.crs-registration-option:last-child {
+  border-bottom: none;
+}
+
+.crs-registration-option:hover {
+  background-color: #f5f5f5;
+}
+
+.crs-registration-option.selected {
+  background-color: #f0f7ff;
+}
+
+/* Left side with radio and label */
+.crs-option-left {
+  flex: 1;
+}
+
+.crs-option-radio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Custom Radio Button */
+.crs-radio-custom {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.crs-radio-custom input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.crs-radio-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #757575;
+  border-radius: 50%;
+  background: white;
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.crs-radio-custom input[type="radio"]:checked ~ .crs-radio-mark {
+  border-color: #1976d2;
+  background: white;
+}
+
+.crs-radio-custom input[type="radio"]:checked ~ .crs-radio-mark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #1976d2;
+  border-radius: 50%;
+}
+
+.crs-option-radio label {
+  font-size: 16px;
+  color: #1a1a1a;
+  cursor: pointer;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.crs-proof-required {
+  font-size: 14px;
+  color: #d32f2f;
+  font-style: italic;
+  margin-left: 4px;
+}
+
+/* Price */
+.crs-option-price {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1976d2;
+  white-space: nowrap;
+  margin-left: 20px;
+}
+
+/* Proof Upload Section */
+.crs-proof-upload {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.crs-proof-label {
+  font-size: 15px;
+  color: #1a1a1a;
+  margin: 0 0 15px 0;
+  font-weight: 500;
+}
+
+/* File Upload */
+.crs-file-upload {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.crs-file-upload input[type="file"] {
+  position: absolute;
+  opacity: 0;
+  width: 0.1px;
+  height: 0.1px;
+  z-index: -1;
+}
+
+.crs-file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #ffffff;
+  border: 2px solid #1976d2;
+  border-radius: 40px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1976d2;
+  transition: all 0.2s ease;
+}
+
+.crs-file-label:hover {
+  background: #1976d2;
+  color: white;
+}
+
+.crs-file-icon {
+  font-size: 16px;
+}
+
+.crs-file-name {
+  font-size: 14px;
+  color: #666666;
+}
+
+/* SIDI Section */
+.crs-sidi-section {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.crs-sidi-description {
+  font-size: 15px;
+  color: #1a1a1a;
+  margin: 0 0 15px 0;
+  line-height: 1.5;
+}
+
+/* Custom Checkbox */
+.crs-sidi-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  position: relative;
+}
+
+.crs-sidi-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.crs-checkbox-mark {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #757575;
+  border-radius: 4px;
+  background: white;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.crs-sidi-checkbox input[type="checkbox"]:checked ~ .crs-checkbox-mark {
+  background: #1976d2;
+  border-color: #1976d2;
+}
+
+.crs-sidi-checkbox input[type="checkbox"]:checked ~ .crs-checkbox-mark::after {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.crs-checkbox-label {
+  font-size: 15px;
+  color: #1a1a1a;
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 600px) {
+  .crs-registration-option {
+    padding: 14px 16px;
+  }
+
+  .crs-option-radio {
+    gap: 10px;
+  }
+
+  .crs-option-radio label {
+    font-size: 15px;
+  }
+
+  .crs-option-price {
+    font-size: 15px;
+  }
+
+  .crs-proof-upload {
+    padding: 16px;
+  }
+
+  .crs-file-upload {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .crs-sidi-section {
+    padding: 16px;
+  }
+
+  .crs-sidi-description {
+    font-size: 14px;
+  }
+
+  .crs-checkbox-label {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 380px) {
+  .crs-registration-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .crs-option-price {
+    margin-left: 32px;
+  }
+}
+
+/*===============================================
+            Form Styles for step 4
+===============================================
+*/
+
+/* Material Design - Clean White Theme */
+.crs-step-content {
+  max-width: 100%;
+  overflow-x: hidden;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+}
+
+/* Hotel options - Material Design Cards */
+.crs-hotels-list {
+  margin-bottom: 30px;
+}
+
+.crs-hotel-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.crs-hotel-option:hover {
+  border-color: #1976d2;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+}
+
+.crs-hotel-option.selected {
+  border-color: #1976d2;
+  background: #f5f9ff;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+}
+
+.crs-hotel-radio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.crs-hotel-radio input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #1976d2;
+  margin: 0;
+}
+
+.crs-hotel-radio label {
+  cursor: pointer;
+  flex: 1;
+}
+
+.crs-hotel-radio strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+  color: #212121;
+  margin-bottom: 4px;
+}
+
+.crs-hotel-address {
+  font-size: 13px;
+  color: #757575;
+  display: block;
+  line-height: 1.4;
+}
+
+.crs-hotel-price {
+  font-weight: 500;
+  color: #1976d2;
+  font-size: 16px;
+  background: #f5f9ff;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  margin-left: 15px;
+  border: 1px solid #e3f2fd;
+}
+
+/* Date selection section - Material Design */
+.crs-date-selection {
+  margin-top: 30px;
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.crs-calendar-header {
+  margin-bottom: 24px;
+}
+
+.crs-calendar-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #212121;
+  margin: 0 0 4px 0;
+}
+
+.crs-calendar-range {
+  font-size: 14px;
+  color: #757575;
+  margin: 0;
+}
+
+/* Calendar container - flexbox for desktop */
+.crs-calendar-container {
+  display: flex;
+  gap: 24px;
+}
+
+.crs-calendar-month {
+  flex: 2;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #eeeeee;
+}
+
+.crs-month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.crs-month-nav {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  color: #212121;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crs-month-nav:hover:not(:disabled) {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}
+
+.crs-month-nav:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+.crs-month-year {
+  font-size: 18px;
+  font-weight: 500;
+  color: #212121;
+}
+
+.crs-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 12px;
+  gap: 4px;
+}
+
+.crs-weekdays span {
+  font-size: 12px;
+  font-weight: 500;
+  color: #757575;
+  text-transform: uppercase;
+}
+
+.crs-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.crs-calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 400;
+  color: #212121;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.crs-calendar-day:hover:not(.disabled):not(.empty) {
+  background: #e3f2fd;
+  border-color: #1976d2;
+}
+
+.crs-calendar-day.selected {
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+  font-weight: 500;
+}
+
+.crs-calendar-day.in-range {
+  background: #e3f2fd;
+  color: #212121;
+  border-color: #1976d2;
+}
+
+.crs-calendar-day.disabled {
+  background: #fafafa;
+  color: #bdbdbd;
+  cursor: not-allowed;
+  border-color: #eeeeee;
+}
+
+.crs-calendar-day.empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.crs-calendar-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.crs-calendar-clear {
+  padding: 6px 16px;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #757575;
+}
+
+.crs-calendar-clear:hover {
+  background: #f5f5f5;
+  border-color: #bdbdbd;
+  color: #212121;
+}
+
+/* Selected dates panel - Material Design */
+.crs-selected-dates {
+  flex: 1;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 12px;
+  border: 1px solid #eeeeee;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+}
+
+.crs-date-field {
+  margin-bottom: 20px;
+}
+
+.crs-date-field:last-child {
+  margin-bottom: 0;
+}
+
+.crs-date-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #757575;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.crs-date-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 400;
+  color: #212121;
+  background: white;
+  cursor: default;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.crs-date-input:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+}
+
+.crs-date-input::placeholder {
+  color: #bdbdbd;
+}
+
+/* Price calculation - Material Design */
+.crs-price-calculation {
+  margin-top: 20px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #eeeeee;
+}
+
+.crs-price-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #212121;
+  font-size: 15px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.crs-price-summary span {
+  color: #757575;
+  font-weight: 400;
+}
+
+.crs-price-summary strong {
+  font-size: 18px;
+  color: #1976d2;
+  font-weight: 500;
+  background: #e3f2fd;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet portrait */
+@media screen and (max-width: 900px) {
+  .crs-calendar-container {
+    flex-direction: column;
+  }
+
+  .crs-calendar-month {
+    width: 100%;
+  }
+
+  .crs-selected-dates {
+    width: 100%;
+    flex-direction: row;
+    gap: 16px;
+  }
+
+  .crs-date-field {
+    flex: 1;
+    margin-bottom: 0;
+  }
+}
+
+/* Mobile portrait */
+@media screen and (max-width: 600px) {
+  .crs-hotel-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .crs-hotel-radio {
+    width: 100%;
+  }
+
+  .crs-hotel-price {
+    align-self: flex-end;
+    margin-left: 0;
+  }
+
+  .crs-selected-dates {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .crs-date-field {
+    width: 100%;
+  }
+
+  .crs-calendar-month {
+    padding: 16px;
+  }
+
+  .crs-calendar-days {
+    gap: 2px;
+  }
+
+  .crs-calendar-day {
+    font-size: 12px;
+  }
+
+  .crs-price-summary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .crs-price-summary strong {
+    align-self: flex-end;
+  }
+
+  .crs-calendar-actions {
+    justify-content: center;
+  }
+
+  .crs-calendar-clear {
+    width: 100%;
+    text-align: center;
+  }
+
+  .crs-date-selection {
+    padding: 16px;
+  }
+}
+
+/* Small mobile */
+@media screen and (max-width: 380px) {
+  .crs-hotel-radio strong {
+    font-size: 15px;
+  }
+
+  .crs-hotel-address {
+    font-size: 12px;
+  }
+
+  .crs-hotel-price {
+    font-size: 14px;
+    padding: 3px 10px;
+  }
+
+  .crs-month-year {
+    font-size: 16px;
+  }
+
+  .crs-month-nav {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .crs-weekdays span {
+    font-size: 11px;
+  }
+
+  .crs-calendar-day {
+    font-size: 11px;
+  }
+}
+
+/*===============================================
+            Form Styles for step 5
+===============================================
+*/
+
+.crs-step-content {
+  max-width: 100%;
+}
+
+.crs-step-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.crs-step-description {
+  color: #64748b;
+  margin: 0 0 32px 0;
+}
+
+/* Meals List */
+.crs-meals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.crs-meal-option {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.crs-meal-option:hover {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+}
+
+.crs-meal-option.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.crs-meal-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.crs-meal-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.crs-meal-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 2px solid #3b82f6;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.crs-meal-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.crs-meal-title {
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.crs-meal-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 9999px;
+  width: fit-content;
+}
+
+.crs-badge-meal {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.crs-badge-gala {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.crs-meal-price {
+  font-size: 18px;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+/* Total Section */
+.crs-total-section {
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.crs-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.crs-total-label {
+  color: #64748b;
+}
+
+.crs-total-amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+/* Allergy Section */
+.crs-allergy-section {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.crs-section-subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+}
+
+.crs-diet-question,
+.crs-allergy-question {
+  margin-bottom: 24px;
+}
+
+.crs-question-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.crs-diet-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 768px) {
+  .crs-diet-options {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.crs-diet-btn,
+.crs-allergy-label {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  user-select: none;
+}
+
+.crs-diet-btn:hover,
+.crs-allergy-label:hover {
+  border-color: #3b82f6;
+}
+
+.crs-diet-btn.active,
+.crs-allergy-label.active {
+  border-color: #3b82f6;
+  background: #3b82f6;
+  color: white;
+}
+
+.crs-diet-btn input[type="checkbox"],
+.crs-allergy-label input[type="radio"] {
+  display: none;
+}
+
+.crs-allergy-options {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.crs-allergy-label {
+  min-width: 80px;
+}
+
+/* Text Input */
+.crs-text-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #0f172a;
+  transition: all 0.2s;
+  margin-top: 12px;
+  box-sizing: border-box;
+}
+
+.crs-text-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.crs-text-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Warning Section */
+.crs-warning-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.crs-warning-icon {
+  width: 20px;
+  height: 20px;
+  color: #f59e0b;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.crs-warning-text {
+  font-size: 14px;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.crs-warning-text strong {
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .crs-meal-option {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .crs-meal-price {
+    align-self: flex-end;
+  }
+
+  .crs-allergy-section {
+    padding: 16px;
+  }
+
+  .crs-warning-section {
+    flex-direction: column;
+  }
+}
+
+/*===============================================
+            Form Styles for step 6
+===============================================
+*/
+
+.crs-step-content {
+  max-width: 100%;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+}
+
+.crs-step-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.3px;
+}
+
+.crs-step-description {
+  font-size: 16px;
+  color: #4a5568;
+  margin: 0 0 28px 0;
+  line-height: 1.5;
+}
+
+/* Workshops Container */
+.crs-workshops-container {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 28px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.crs-workshop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.crs-workshop-row:last-child {
+  border-bottom: none;
+}
+
+.crs-workshop-row:hover {
+  background-color: #f7fafc;
+}
+
+.crs-workshop-row.selected {
+  background-color: #ebf8ff;
+}
+
+.crs-workshop-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+/* Custom Checkbox */
+.crs-custom-checkbox {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: inline-block;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.crs-custom-checkbox input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.crs-checkbox-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cbd5e0;
+  border-radius: 4px;
+  background: white;
+  transition: all 0.15s ease;
+}
+
+.crs-custom-checkbox input[type="checkbox"]:checked ~ .crs-checkbox-mark {
+  background: #3182ce;
+  border-color: #3182ce;
+}
+
+.crs-custom-checkbox
+  input[type="checkbox"]:checked
+  ~ .crs-checkbox-mark::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.crs-workshop-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.crs-workshop-title {
+  font-weight: 600;
+  color: #1a202c;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.crs-workshop-datetime {
+  font-size: 14px;
+  color: #718096;
+  line-height: 1.4;
+}
+
+.crs-workshop-seats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 16px;
+  flex-shrink: 0;
+}
+
+.crs-seats-icon {
+  width: 16px;
+  height: 16px;
+  color: #dd6b20;
+}
+
+.crs-seats-count {
+  font-size: 14px;
+  color: #000;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.crs-no-workshops {
+  padding: 40px 20px;
+  text-align: center;
+  color: #718096;
+  font-size: 16px;
+}
+
+/* Communication Section - Button Style */
+.crs-communication-section {
+  margin-top: 24px;
+}
+
+.crs-communication-question {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a202c;
+  margin: 0 0 16px 0;
+}
+
+.crs-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.crs-button-label {
+  position: relative;
+  cursor: pointer;
+  min-width: 70px;
+}
+
+.crs-button-label input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.crs-button-text {
+  display: block;
+  padding: 10px 20px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 40px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #4a5568;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.crs-button-label:hover .crs-button-text {
+  border-color: #3182ce;
+  color: #3182ce;
+}
+
+.crs-button-label.selected .crs-button-text {
+  background: #3182ce;
+  border-color: #3182ce;
+  color: white;
+}
+
+.crs-button-full {
+  flex: 0 0 auto;
+}
+
+.crs-button-full .crs-button-text {
+  padding: 10px 24px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .crs-workshop-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .crs-workshop-checkbox {
+    width: 100%;
+  }
+
+  .crs-workshop-seats {
+    margin-left: 32px;
+  }
+
+  .crs-button-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .crs-button-label {
+    width: 100%;
+  }
+
+  .crs-button-text {
+    text-align: center;
+  }
+
+  .crs-step-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 380px) {
+  .crs-workshop-checkbox {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .crs-workshop-seats {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/*===============================================
+            Form Styles for step 7
+===============================================
+*/
+
+.crs-step-content {
+  max-width: 100%;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+    Cantarell, sans-serif;
+}
+
+.crs-step-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 8px 0;
+}
+
+.crs-step-description {
+  font-size: 16px;
+  color: #666666;
+  margin: 0 0 32px 0;
+}
+
+.crs-image-release-section,
+.crs-observations-section {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.crs-section-subtitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #000000;
+  margin: 0 0 16px 0;
+}
+
+.crs-release-description {
+  font-size: 14px;
+  color: #666666;
+  line-height: 1.6;
+  margin: 0 0 20px 0;
+}
+
+/* Checkbox Label */
+.crs-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  position: relative;
+  font-size: 15px;
+  color: #333333;
+  line-height: 1.5;
+}
+
+.crs-checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.crs-checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #999999;
+  border-radius: 4px;
+  background: white;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  position: relative;
+  margin-top: 2px;
+}
+
+.crs-checkbox-label input[type="checkbox"]:checked ~ .crs-checkbox-custom {
+  background: #0066cc;
+  border-color: #0066cc;
+}
+
+.crs-checkbox-label
+  input[type="checkbox"]:checked
+  ~ .crs-checkbox-custom::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.crs-checkbox-text {
+  flex: 1;
+}
+
+.crs-required-checkbox .crs-checkbox-text {
+  font-weight: 500;
+}
+
+/* Observations Section */
+.crs-observations-label {
+  display: block;
+  font-size: 14px;
+  color: #666666;
+  margin-bottom: 12px;
+}
+
+.crs-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #cccccc;
+  border-radius: 8px;
+  font-size: 15px;
+  color: #333333;
+  transition: all 0.2s ease;
+  resize: vertical;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.crs-textarea:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+}
+
+.crs-textarea::placeholder {
+  color: #999999;
+}
+
+/* Validation */
+.crs-validation-message {
+  font-size: 13px;
+  margin-top: 8px;
+  padding-left: 32px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .crs-step-title {
+    font-size: 24px;
+  }
+
+  .crs-image-release-section,
+  .crs-observations-section {
+    padding: 20px;
+  }
+
+  .crs-section-subtitle {
+    font-size: 16px;
+  }
+
+  .crs-release-description {
+    font-size: 13px;
+  }
+
+  .crs-checkbox-text {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .crs-image-release-section,
+  .crs-observations-section {
+    padding: 16px;
+  }
+
+  .crs-checkbox-label {
+    gap: 10px;
+  }
+
+  .crs-checkbox-custom {
+    width: 18px;
+    height: 18px;
+  }
+
+  .crs-checkbox-custom:checked ~ .crs-checkbox-custom::after {
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 9px;
+  }
+}
