@@ -380,7 +380,7 @@ class CR_Shortcodes {
                         if ($step_num == $step) {
                             $class .= ' active';
                         } elseif ($step_num < $step) {
-                            $class .= ' completed';
+                            $class .= ' confirmed';
                         }
                         
                         echo '<div class="' . $class . '">';
@@ -461,7 +461,7 @@ class CR_Shortcodes {
                 background: #007cba;
                 color: #fff;
             }
-            .cr-step.completed .cr-step-number {
+            .cr-step.confirmed .cr-step-number {
                 background: #46b450;
                 color: #fff;
             }

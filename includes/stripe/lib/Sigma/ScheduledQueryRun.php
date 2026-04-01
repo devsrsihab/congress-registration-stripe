@@ -19,7 +19,7 @@ namespace Stripe\Sigma;
  * @property bool $livemode Has the value <code>true</code> if the object exists in live mode or the value <code>false</code> if the object exists in test mode.
  * @property int $result_available_until Time at which the result expires and is no longer available for download.
  * @property string $sql SQL for the query.
- * @property string $status The query's execution status, which will be <code>completed</code> for successful runs, and <code>canceled</code>, <code>failed</code>, or <code>timed_out</code> otherwise.
+ * @property string $status The query's execution status, which will be <code>confirmed</code> for successful runs, and <code>canceled</code>, <code>failed</code>, or <code>timed_out</code> otherwise.
  * @property string $title Title of the query.
  */
 class ScheduledQueryRun extends \Stripe\ApiResource

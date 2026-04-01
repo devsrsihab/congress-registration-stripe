@@ -145,7 +145,7 @@ function initStripePayment() {
                 const { error, paymentIntent } = await stripe.confirmPayment({
                     elements,
                     confirmParams: {
-                        return_url: '<?php echo home_url('/my-registrations/'); ?>',
+                        return_url: '<?php echo home_url('/account/'); ?>',
                     },
                     redirect: 'if_required'
                 });

@@ -30,7 +30,7 @@ jQuery(document).ready(function ($) {
                         <label>Status</label>
                         <select name="booking_status">
                             <option value="pending" ${booking.booking_status === "pending" ? "selected" : ""}>Pending</option>
-                            <option value="completed" ${booking.booking_status === "completed" ? "selected" : ""}>Completed</option>
+                            <option value="confirmed" ${booking.booking_status === "confirmed" ? "selected" : ""}>Confirmed</option>
                             <option value="cancelled" ${booking.booking_status === "cancelled" ? "selected" : ""}>Cancelled</option>
                         </select>
                     </p>
@@ -38,7 +38,7 @@ jQuery(document).ready(function ($) {
                         <label>Payment Status</label>
                         <select name="payment_status">
                             <option value="pending" ${booking.payment_status === "pending" ? "selected" : ""}>Pending</option>
-                            <option value="completed" ${booking.payment_status === "completed" ? "selected" : ""}>Completed</option>
+                            <option value="confirmed" ${booking.payment_status === "confirmed" ? "selected" : ""}>Confirmed</option>
                             <option value="failed" ${booking.payment_status === "failed" ? "selected" : ""}>Failed</option>
                         </select>
                     </p>
@@ -53,7 +53,7 @@ jQuery(document).ready(function ($) {
     // Show modal (you can use a proper modal library or simple prompt for now)
     // For simplicity, we'll just use a prompt for now
     var newStatus = prompt(
-      "Enter new status (pending/completed/cancelled):",
+      "Enter new status (pending/confirmed/cancelled):",
       booking.booking_status,
     );
     if (newStatus) {

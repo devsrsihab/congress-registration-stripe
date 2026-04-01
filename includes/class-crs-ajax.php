@@ -169,43 +169,70 @@ class CRS_Ajax {
         }
     }
     
-    public static function crs_save_without_payment() {
-        check_ajax_referer('crs_nonce', 'nonce');
-        $data = json_decode(stripslashes($_POST['data']), true);
-        
-        // Use current user (already logged in, might be third person from step 1)
-        $user_id = get_current_user_id();
-
-         // If third person user ID exists in formData, use that
-        if (isset($data['third_person_user_id']) && !empty($data['third_person_user_id'])) {
-            $user_id = intval($data['third_person_user_id']);
-        }
+public static function crs_save_without_payment() {
+    check_ajax_referer('crs_nonce', 'nonce');
+    $data = json_decode(stripslashes($_POST['data']), true);
     
-        
-        // Only create third person if not already created (fallback)
-        if (isset($data['registration_type']) && $data['registration_type'] === 'third_person' && !$user_id) {
-            $user_id = CRS_Payment::createThirdPersonUser($data);
-        }
-        
-        $booking_id = CRS_Payment::saveBooking($data, 'pending', '', $user_id);
-        
-        if ($booking_id) {
-            global $wpdb;
-            $booking_data = $wpdb->get_row($wpdb->prepare(
-                "SELECT * FROM {$wpdb->prefix}cr_bookings WHERE id = %d",
-                $booking_id
-            ));
-            do_action('crs_after_pending_registration', $booking_id, $booking_data);
-            
-            wp_send_json_success([
-                'message' => 'Registration saved as pending',
-                'booking_id' => $booking_id,
-                'redirect' => home_url('/my-registrations/?booking=' . $booking_id)
-            ]);
+    // DEBUG: Log incoming data
+    error_log('===== CRS: Save Without Payment =====');
+    error_log('CRS: Data received: ' . print_r($data, true));
+    
+    // Ensure congress_id is set
+    if (empty($data['congress_id'])) {
+        // Try to get congress_id from the data array
+        if (isset($_POST['congress_id']) && !empty($_POST['congress_id'])) {
+            $data['congress_id'] = intval($_POST['congress_id']);
+            error_log('CRS: Congress ID from POST: ' . $data['congress_id']);
+        } elseif (isset($data['congress_id']) && !empty($data['congress_id'])) {
+            error_log('CRS: Congress ID from data: ' . $data['congress_id']);
         } else {
-            wp_send_json_error('Failed to save booking');
+            error_log('CRS: WARNING - Congress ID is empty!');
         }
     }
+    
+    // Use current user
+    $user_id = get_current_user_id();
+    
+    // If third person user ID exists in formData, use that
+    if (isset($data['third_person_user_id']) && !empty($data['third_person_user_id'])) {
+        $user_id = intval($data['third_person_user_id']);
+        error_log('CRS: Using third person user ID: ' . $user_id);
+    }
+    
+    // Only create third person if not already created (fallback)
+    if (isset($data['registration_type']) && $data['registration_type'] === 'third_person' && !$user_id) {
+        $user_id = CRS_Payment::createThirdPersonUser($data);
+        error_log('CRS: Created third person user on the fly: ' . $user_id);
+    }
+    
+    error_log('CRS: Final data before save - Congress ID: ' . ($data['congress_id'] ?? 'NOT SET'));
+    error_log('CRS: Final user ID: ' . $user_id);
+    
+    $booking_id = CRS_Payment::saveBooking($data, 'pending', '', $user_id);
+    
+    if ($booking_id) {
+        error_log('CRS: Booking created with ID: ' . $booking_id);
+        
+        global $wpdb;
+        $booking_data = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}cr_bookings WHERE id = %d",
+            $booking_id
+        ));
+        
+        error_log('CRS: Saved booking - Congress ID in DB: ' . ($booking_data->congress_id ?? 'NOT SET'));
+        
+        do_action('crs_after_pending_registration', $booking_id, $booking_data);
+        
+        wp_send_json_success([
+            'message' => 'Registration saved as pending',
+            'booking_id' => $booking_id,
+            'redirect' => home_url('/account')
+        ]);
+    } else {
+        error_log('CRS: Failed to create booking');
+        wp_send_json_error('Failed to save booking');
+    }
+}
     
     public static function crs_load_stripe_payment_form() {
         check_ajax_referer('crs_nonce', 'nonce');

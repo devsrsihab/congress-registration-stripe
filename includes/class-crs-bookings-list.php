@@ -37,7 +37,7 @@ class CRS_Bookings_List_Table extends WP_List_Table {
     public function get_bulk_actions() {
         return [
             'delete'          => 'Delete Permanently',
-            'mark_completed'  => 'Mark as Completed',
+            'mark_completed'  => 'Mark as Confirmed',
             'mark_pending'    => 'Mark as Pending',
             'mark_cancelled'  => 'Mark as Cancelled'
         ];
@@ -221,9 +221,9 @@ class CRS_Bookings_List_Table extends WP_List_Table {
             $bookings = isset($_REQUEST['booking']) ? $_REQUEST['booking'] : [];
             if (!empty($bookings)) {
                 foreach ($bookings as $booking_id) {
-                    $wpdb->update($table_name, ['booking_status' => 'completed'], ['id' => $booking_id]);
+                    $wpdb->update($table_name, ['booking_status' => 'confirmed'], ['id' => $booking_id]);
                 }
-                echo '<div class="notice notice-success"><p>Selected bookings marked as completed.</p></div>';
+                echo '<div class="notice notice-success"><p>Selected bookings marked as confirmed.</p></div>';
             }
         }
         
@@ -376,7 +376,7 @@ class CRS_Bookings_List_Table extends WP_List_Table {
                             <tr>
                                 <td style="font-weight: 600;">Status:</td>
                                 <td>
-                                    <span style="background-color: <?php echo $booking->booking_status == 'completed' ? '#27ae60' : ($booking->booking_status == 'pending' ? '#f39c12' : '#e74c3c'); ?>; color: white; padding: 4px 10px; border-radius: 4px;">
+                                    <span style="background-color: <?php echo $booking->booking_status == 'confirmed' ? '#27ae60' : ($booking->booking_status == 'pending' ? '#f39c12' : '#e74c3c'); ?>; color: white; padding: 4px 10px; border-radius: 4px;">
                                         <?php echo esc_html(ucfirst($booking->booking_status)); ?>
                                     </span>
                                 </td>
@@ -384,7 +384,7 @@ class CRS_Bookings_List_Table extends WP_List_Table {
                             <tr>
                                 <td style="font-weight: 600;">Payment:</td>
                                 <td>
-                                    <span style="background-color: <?php echo $booking->payment_status == 'completed' ? '#27ae60' : ($booking->payment_status == 'pending' ? '#f39c12' : '#e74c3c'); ?>; color: white; padding: 4px 10px; border-radius: 4px;">
+                                    <span style="background-color: <?php echo $booking->payment_status == 'confirmed' ? '#27ae60' : ($booking->payment_status == 'pending' ? '#f39c12' : '#e74c3c'); ?>; color: white; padding: 4px 10px; border-radius: 4px;">
                                         <?php echo esc_html(ucfirst($booking->payment_status)); ?>
                                     </span>
                                 </td>

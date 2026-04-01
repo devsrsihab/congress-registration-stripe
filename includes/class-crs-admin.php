@@ -77,8 +77,8 @@ class CRS_Admin {
         $total_hotels = wp_count_posts('hotels')->publish;
         $total_bookings = $wpdb->get_var("SELECT COUNT(*) FROM $bookings_table");
         $pending_bookings = $wpdb->get_var("SELECT COUNT(*) FROM $bookings_table WHERE booking_status = 'pending'");
-        $completed_bookings = $wpdb->get_var("SELECT COUNT(*) FROM $bookings_table WHERE booking_status = 'completed'");
-        $total_revenue = $wpdb->get_var("SELECT SUM(total_amount) FROM $bookings_table WHERE payment_status = 'completed'");
+        $completed_bookings = $wpdb->get_var("SELECT COUNT(*) FROM $bookings_table WHERE booking_status = 'confirmed'");
+        $total_revenue = $wpdb->get_var("SELECT SUM(total_amount) FROM $bookings_table WHERE payment_status = 'confirmed'");
         
         include CRS_PLUGIN_DIR . 'templates/admin/dashboard.php';
     }

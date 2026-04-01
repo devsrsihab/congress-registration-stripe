@@ -11,12 +11,13 @@ class CRS_Shortcodes {
     add_shortcode('crs_test', [self::class, 'test_shortcode']);
 
     }
-// DEBUG FUNCTION - temporarily add this
-public static function test_shortcode() {
-    return 'Shortcode is working!';
-}
-     
-    // ADD THIS METHOD
+
+
+    // DEBUG FUNCTION - temporarily add this
+    public static function test_shortcode() {
+        return 'Shortcode is working!';
+    }
+        
     public static function renderBookingDetails($atts) {
         ob_start();
         
@@ -27,20 +28,20 @@ public static function test_shortcode() {
                     <div class="crs-error-icon">🔍</div>
                     <h3>Booking ID Required</h3>
                     <p>Please provide a valid booking ID.</p>
-                  </div>';
-            return ob_get_clean();
-        }        
-        if (!$booking_id) {
-            echo '<div class="crs-error">Booking ID required</div>';
+                </div>';
             return ob_get_clean();
         }
         
         global $wpdb;
+        
+        // Get booking data
         $booking = $wpdb->get_row($wpdb->prepare("
-            SELECT cr_bookings.*, posts.post_title AS congress_name
-            FROM {$wpdb->prefix}cr_bookings AS cr_bookings
-            INNER JOIN {$wpdb->posts} AS posts ON cr_bookings.congress_id = posts.ID
-            WHERE cr_bookings.id = %d
+            SELECT 
+                b.*,
+                p.post_title AS congress_name
+            FROM {$wpdb->prefix}cr_bookings b
+            LEFT JOIN {$wpdb->posts} p ON b.congress_id = p.ID
+            WHERE b.id = %d
         ", $booking_id));
         
         if (!$booking) {
@@ -48,10 +49,72 @@ public static function test_shortcode() {
             return ob_get_clean();
         }
         
-        $user = get_userdata($booking->user_id);
-        $additional = json_decode($booking->additional_options, true);
+        // Decode JSON fields
+        $additional = !empty($booking->additional_options) ? json_decode($booking->additional_options, true) : [];
+        $meal_preferences = !empty($booking->meal_preferences) ? json_decode($booking->meal_preferences, true) : [];
+        $workshop_ids = !empty($booking->workshop_ids) ? json_decode($booking->workshop_ids, true) : [];
         
-        // Include the template file
+        // Get registration type
+        $reg_type_name = '';
+        $reg_type_price = 0;
+        if (!empty($additional['registration_type_id'])) {
+            $type = $wpdb->get_row($wpdb->prepare(
+                "SELECT name, price FROM {$wpdb->prefix}registration_types WHERE id = %d",
+                $additional['registration_type_id']
+            ));
+            if ($type) {
+                $reg_type_name = $type->name;
+                $reg_type_price = $type->price;
+            }
+        }
+        
+        // Get meals
+        $meals_list = [];
+        $meals_total = 0;
+        if (!empty($meal_preferences) && $booking->congress_id) {
+            $congress_meals = get_post_meta($booking->congress_id, 'congress_meals', true);
+            if (is_array($congress_meals)) {
+                foreach ($meal_preferences as $meal_index) {
+                    if (isset($congress_meals[$meal_index])) {
+                        $meals_list[] = $congress_meals[$meal_index];
+                        $meals_total += floatval($congress_meals[$meal_index]['meal_price']);
+                    }
+                }
+            }
+        }
+        
+        // Get workshops
+        $workshops_list = [];
+        if (!empty($workshop_ids) && $booking->congress_id) {
+            $congress_workshops = get_post_meta($booking->congress_id, 'congress_workshop', true);
+            if (is_array($congress_workshops)) {
+                foreach ($workshop_ids as $workshop_index) {
+                    if (isset($congress_workshops[$workshop_index])) {
+                        $workshops_list[] = $congress_workshops[$workshop_index];
+                    }
+                }
+            }
+        }
+        
+        // Calculate nights
+        $nights = 0;
+        $hotel_name = '';
+        $hotel_total = 0;
+        if ($booking->selected_hotel_id) {
+            $hotel = get_post($booking->selected_hotel_id);
+            if ($hotel) {
+                $hotel_name = get_the_title($hotel);
+                $price_per_night = get_post_meta($booking->selected_hotel_id, 'price_per_night', true);
+                if ($booking->check_in_date && $booking->check_out_date) {
+                    $nights = ceil((strtotime($booking->check_out_date) - strtotime($booking->check_in_date)) / (60 * 60 * 24));
+                    $hotel_total = floatval($price_per_night) * $nights;
+                }
+            }
+        }
+        
+        $dietary = isset($additional['dietary_info']) ? $additional['dietary_info'] : [];
+        
+        // Include template
         include CRS_PLUGIN_DIR . 'templates/booking-details.php';
         
         return ob_get_clean();
@@ -80,7 +143,7 @@ public static function test_shortcode() {
         $documents_table = $wpdb->prefix . 'cr_documents';
         
         $registrations = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $bookings_table WHERE user_id = %d AND booking_status = 'completed' ORDER BY created_at DESC",
+            "SELECT * FROM $bookings_table WHERE user_id = %d AND booking_status = 'confirmed' ORDER BY created_at DESC",
             $user_id
         ));
         
@@ -91,7 +154,7 @@ public static function test_shortcode() {
         
         $customer_orders = wc_get_orders([
             'customer_id' => $user_id,
-            'status' => ['completed', 'processing'],
+            'status' => ['confirmed', 'processing'],
             'limit' => -1,
         ]);
         

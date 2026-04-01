@@ -345,7 +345,7 @@ class CR_Bookings {
         
         if ($column === 'total_bookings') {
             $count = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $this->table_name WHERE congress_id = %d AND booking_status = 'completed'",
+                "SELECT COUNT(*) FROM $this->table_name WHERE congress_id = %d AND booking_status = 'confirmed'",
                 $post_id
             ));
             
@@ -354,7 +354,7 @@ class CR_Bookings {
         
         if ($column === 'revenue') {
             $total = $wpdb->get_var($wpdb->prepare(
-                "SELECT SUM(total_amount) FROM $this->table_name WHERE congress_id = %d AND payment_status = 'completed'",
+                "SELECT SUM(total_amount) FROM $this->table_name WHERE congress_id = %d AND payment_status = 'confirmed'",
                 $post_id
             ));
             
@@ -390,9 +390,9 @@ class CR_Bookings {
         $payment_status = 'pending';
         
         switch ($order_status) {
-            case 'completed':
-                $booking_status = 'completed';
-                $payment_status = 'completed';
+            case 'confirmed':
+                $booking_status = 'confirmed';
+                $payment_status = 'confirmed';
                 break;
             case 'processing':
                 $booking_status = 'confirmed';
@@ -422,8 +422,8 @@ class CR_Bookings {
             'payment_status' => $payment_status
         ));
         
-        // If payment completed, generate documents
-        if ($payment_status === 'completed') {
+        // If payment confirmed, generate documents
+        if ($payment_status === 'confirmed') {
             $this->generate_booking_documents($booking->id);
         }
     }
@@ -511,9 +511,9 @@ class CR_Bookings {
             $args
         ));
         
-        // Completed bookings
+        // Confirmed bookings
         $completed_bookings = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM $this->table_name $where AND booking_status = 'completed'",
+            "SELECT COUNT(*) FROM $this->table_name $where AND booking_status = 'confirmed'",
             $args
         ));
         
@@ -525,13 +525,13 @@ class CR_Bookings {
         
         // Total revenue
         $total_revenue = $wpdb->get_var($wpdb->prepare(
-            "SELECT SUM(total_amount) FROM $this->table_name $where AND payment_status = 'completed'",
+            "SELECT SUM(total_amount) FROM $this->table_name $where AND payment_status = 'confirmed'",
             $args
         ));
         
         return array(
             'total' => intval($total_bookings),
-            'completed' => intval($completed_bookings),
+            'confirmed' => intval($completed_bookings),
             'pending' => intval($pending_bookings),
             'revenue' => floatval($total_revenue)
         );

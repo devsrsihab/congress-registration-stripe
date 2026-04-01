@@ -6,7 +6,7 @@ namespace Stripe\Issuing;
 
 /**
  * Any use of an <a href="https://docs.stripe.com/issuing">issued card</a> that results in funds entering or leaving
- * your Stripe account, such as a completed purchase or refund, is represented by an Issuing
+ * your Stripe account, such as a confirmed purchase or refund, is represented by an Issuing
  * <code>Transaction</code> object.
  *
  * Related guide: <a href="https://docs.stripe.com/issuing/purchases/transactions">Issued card transactions</a>

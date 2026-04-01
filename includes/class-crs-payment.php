@@ -206,72 +206,81 @@ class CRS_Payment {
         }
     }
     
-    public static function confirmPayment($intent_id, $temp_booking_id) {
-        $keys = self::getKeys();
-        
-        if (empty($keys['secret'])) {
-            return ['success' => false, 'error' => 'Stripe not configured'];
-        }
-        
-        \Stripe\Stripe::setApiKey($keys['secret']);
-        
-        try {
-            $intent = \Stripe\PaymentIntent::retrieve($intent_id);
-            
-            if ($intent->status === 'succeeded') {
-                $temp_data = get_transient('crs_temp_booking_' . $temp_booking_id);
-                
-                if (!$temp_data) {
-                    return ['success' => false, 'error' => 'Temporary booking data expired'];
-                }
-                
-                $booking_id = self::createBookingAfterPayment(
-                    $temp_data['data'],
-                    $intent_id,
-                    $temp_data['proof_file_id'] ?? 0,
-                    $temp_data['proof_file_url'] ?? '',
-                    $temp_data['proof_file_name'] ?? '',
-                    $temp_data['user_id']
-                );
-                
-                if ($booking_id) {
-                    delete_transient('crs_temp_booking_' . $temp_booking_id);
-                    CRS_Documents::generateBookingDocuments($booking_id);
-                    
-                    global $wpdb;
-                    $booking_data = $wpdb->get_row($wpdb->prepare(
-                        "SELECT * FROM {$wpdb->prefix}cr_bookings WHERE id = %d",
-                        $booking_id
-                    ));
-                    
-                    do_action('crs_after_registration_complete', $booking_id, $booking_data);
-                    
-                    return ['success' => true, 'data' => [
-                        'message' => 'Payment successful!',
-                        'redirect' => home_url('/booking-confirmation/?booking=' . $booking_id)
-                    ]];
-                } else {
-                    return ['success' => false, 'error' => 'Failed to create booking'];
-                }
-            } else {
-                $temp_data = get_transient('crs_temp_booking_' . $temp_booking_id);
-                if ($temp_data) {
-                    $failed_booking = (object)[
-                        'id' => 0,
-                        'user_id' => $temp_data['user_id'],
-                        'booking_number' => 'TEMP-' . $temp_booking_id,
-                        'congress_id' => $temp_data['data']['congress_id'] ?? 0,
-                        'total_amount' => $intent->amount / 100,
-                        'additional_options' => json_encode($temp_data['data'])
-                    ];
-                    do_action('crs_payment_failed', 0, $failed_booking);
-                }
-                return ['success' => false, 'error' => 'Payment not completed'];
-            }
-        } catch (Exception $e) {
-            return ['success' => false, 'error' => 'Stripe error: ' . $e->getMessage()];
-        }
+public static function confirmPayment($intent_id, $temp_booking_id) {
+    $keys = self::getKeys();
+    
+    if (empty($keys['secret'])) {
+        return ['success' => false, 'error' => 'Stripe not configured'];
     }
+    
+    \Stripe\Stripe::setApiKey($keys['secret']);
+    
+    try {
+        $intent = \Stripe\PaymentIntent::retrieve($intent_id);
+        
+        if ($intent->status === 'succeeded') {
+            $temp_data = get_transient('crs_temp_booking_' . $temp_booking_id);
+            
+            if (!$temp_data) {
+                error_log('CRS: Temp booking data not found for ID: ' . $temp_booking_id);
+                return ['success' => false, 'error' => 'Temporary booking data expired'];
+            }
+            
+            error_log('CRS: Temp data found - User ID: ' . $temp_data['user_id'] . ', Type: ' . ($temp_data['data']['registration_type'] ?? 'personal'));
+            
+            $booking_id = self::createBookingAfterPayment(
+                $temp_data['data'],
+                $intent_id,
+                $temp_data['proof_file_id'] ?? 0,
+                $temp_data['proof_file_url'] ?? '',
+                $temp_data['proof_file_name'] ?? '',
+                $temp_data['user_id']
+            );
+            
+            error_log('CRS: Booking created with ID: ' . $booking_id);
+            
+            if ($booking_id) {
+                delete_transient('crs_temp_booking_' . $temp_booking_id);
+                CRS_Documents::generateBookingDocuments($booking_id);
+                
+                global $wpdb;
+                $booking_data = $wpdb->get_row($wpdb->prepare(
+                    "SELECT * FROM {$wpdb->prefix}cr_bookings WHERE id = %d",
+                    $booking_id
+                ));
+                
+                do_action('crs_after_registration_complete', $booking_id, $booking_data);
+                
+                return ['success' => true, 'data' => [
+                    'message' => 'Payment successful!',
+                    'redirect' => home_url('/booking-confirmation/?booking=' . $booking_id),
+                    'booking_id' => $booking_id
+                ]];
+            } else {
+                error_log('CRS: Failed to create booking after payment');
+                return ['success' => false, 'error' => 'Failed to create booking'];
+            }
+        } else {
+            $temp_data = get_transient('crs_temp_booking_' . $temp_booking_id);
+            if ($temp_data) {
+                $failed_booking = (object)[
+                    'id' => 0,
+                    'user_id' => $temp_data['user_id'],
+                    'booking_number' => 'TEMP-' . $temp_booking_id,
+                    'congress_id' => $temp_data['data']['congress_id'] ?? 0,
+                    'total_amount' => $intent->amount / 100,
+                    'additional_options' => json_encode($temp_data['data'])
+                ];
+                do_action('crs_payment_failed', 0, $failed_booking);
+            }
+            error_log('CRS: Payment not confirmed - Status: ' . $intent->status);
+            return ['success' => false, 'error' => 'Payment not confirmed'];
+        }
+    } catch (Exception $e) {
+        error_log('CRS: Stripe error in confirmPayment - ' . $e->getMessage());
+        return ['success' => false, 'error' => 'Stripe error: ' . $e->getMessage()];
+    }
+}
     
 public static function createBookingAfterPayment($data, $intent_id, $proof_file_id, $proof_file_url, $proof_file_name, $user_id) {
     global $wpdb;
@@ -324,8 +333,8 @@ public static function createBookingAfterPayment($data, $intent_id, $proof_file_
         'meal_preferences' => $meal_preferences,
         'workshop_ids' => $workshop_ids,
         'total_amount' => floatval($total),
-        'booking_status' => 'completed',
-        'payment_status' => 'completed',
+        'booking_status' => 'confirmed',
+        'payment_status' => 'confirmed',
         'created_at' => current_time('mysql')
     ];
     
@@ -533,8 +542,8 @@ public static function createBookingAfterPayment($data, $intent_id, $proof_file_
         
         $result = $wpdb->insert($bookings_table, $booking_data);
         
-        // Record coupon usage if coupon was applied (only for completed bookings)
-        if ($result && $status === 'completed' && $applied_coupon_id && $discount_amount > 0) {
+        // Record coupon usage if coupon was applied (only for confirmed bookings)
+        if ($result && $status === 'confirmed' && $applied_coupon_id && $discount_amount > 0) {
             if (!class_exists('CRS_Coupon')) {
                 require_once CRS_PLUGIN_DIR . 'includes/class-crs-coupon.php';
             }
@@ -587,8 +596,8 @@ public static function createBookingAfterPayment($data, $intent_id, $proof_file_
             $options = json_decode($booking->additional_options, true);
             if (!empty($options['stripe_payment_intent']) && $options['stripe_payment_intent'] === $intent_id) {
                 $wpdb->update($bookings_table, [
-                    'booking_status' => 'completed',
-                    'payment_status' => 'completed'
+                    'booking_status' => 'confirmed',
+                    'payment_status' => 'confirmed'
                 ], ['id' => $booking->id]);
                 CRS_Documents::generateBookingDocuments($booking->id);
                 break;

@@ -7,7 +7,7 @@ namespace Stripe;
 /**
  * A payment link is a shareable URL that will take your customers to a hosted payment page. A payment link can be shared and used multiple times.
  *
- * When a customer opens a payment link it will open a new <a href="https://docs.stripe.com/api/checkout/sessions">checkout session</a> to render the payment page. You can use <a href="https://docs.stripe.com/api/events/types#event_types-checkout.session.completed">checkout session events</a> to track payments through payment links.
+ * When a customer opens a payment link it will open a new <a href="https://docs.stripe.com/api/checkout/sessions">checkout session</a> to render the payment page. You can use <a href="https://docs.stripe.com/api/events/types#event_types-checkout.session.confirmed">checkout session events</a> to track payments through payment links.
  *
  * Related guide: <a href="https://docs.stripe.com/payment-links">Payment Links API</a>
  *

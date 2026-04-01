@@ -98,7 +98,7 @@ class CRS_Documents {
         $html .= '<h2>Congress Details</h2>';
         $html .= '<div class="row"><span class="label">Congress:</span> ' . esc_html(get_the_title($booking->congress_id)) . '</div>';
         $html .= '<div class="row"><span class="label">Total Amount:</span> ' . wc_price($booking->total_amount) . '</div>';
-        $html .= '<div class="row"><span class="label">Payment Status:</span> Completed</div></div>';
+        $html .= '<div class="row"><span class="label">Payment Status:</span> Confirmed</div></div>';
         $html .= '<p>Thank you for your registration!</p></body></html>';
         
         file_put_contents($filepath, $html);
@@ -148,7 +148,7 @@ class CRS_Documents {
             "SELECT b.*, p.post_title AS congress_title
              FROM $bookings_table b
              INNER JOIN {$wpdb->posts} p ON b.congress_id = p.ID
-             WHERE b.user_id = %d AND b.booking_status = 'completed'
+             WHERE b.user_id = %d AND b.booking_status = 'confirmed'
              ORDER BY b.created_at DESC",
             $user_id
         ));

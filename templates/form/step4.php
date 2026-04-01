@@ -214,17 +214,35 @@
                 // Hotel selection
                 $('.crs-hotel-option').on('click', function() {
                     var radio = $(this).find('input[type="radio"]');
-                    radio.prop('checked', true);
+                    var newHotelId = radio.val();
+                    var currentHotelId = $('input[name="hotel_id"]:checked').val();
                     
+                    // If hotel is changing, reset all dates
+                    if (currentHotelId !== newHotelId) {
+                        // Reset date selections
+                        selectedCheckIn = null;
+                        selectedCheckOut = null;
+                        
+                        // Clear all date inputs
+                        $('#check_in_date, #check_out_date, #check_in_display, #check_out_display').val('');
+                        $('#hotel-price-calculation').empty();
+                        
+                        // Refresh calendar
+                        if (typeof renderCalendar === 'function') {
+                            renderCalendar(currentMonth, currentYear);
+                        }
+                    }
+                    
+                    // Update UI
+                    radio.prop('checked', true);
                     $('.crs-hotel-option').removeClass('selected');
                     $(this).addClass('selected');
                     
-                    if (radio.val() !== '0') {
+                    // Show/hide date picker
+                    if (newHotelId !== '0') {
                         $('.crs-date-selection').slideDown();
-                        renderCalendar(currentMonth, currentYear);
                     } else {
                         $('.crs-date-selection').slideUp();
-                        clearDates();
                     }
                 });
                 

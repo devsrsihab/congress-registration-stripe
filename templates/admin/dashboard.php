@@ -39,7 +39,7 @@
             <div class="crs-stat-icon">✅</div>
             <div class="crs-stat-content">
                 <h3><?php echo $completed_bookings; ?></h3>
-                <p><?php _e('Completed', 'crscngres'); ?></p>
+                <p><?php _e('Confirmed', 'crscngres'); ?></p>
             </div>
         </div>
         
@@ -118,6 +118,6 @@
     .crs-recent-bookings { margin-top: 30px; }
     .crs-status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
     .crs-status-pending { background: #fff3cd; color: #856404; }
-    .crs-status-completed { background: #d4edda; color: #155724; }
+    .crs-status-confirmed { background: #d4edda; color: #155724; }
     .crs-status-cancelled { background: #f8d7da; color: #721c24; }
 </style>

@@ -7,7 +7,7 @@ namespace Stripe\Issuing;
 /**
  * When an <a href="https://docs.stripe.com/issuing">issued card</a> is used to make a purchase, an Issuing <code>Authorization</code>
  * object is created. <a href="https://docs.stripe.com/issuing/purchases/authorizations">Authorizations</a> must be approved for the
- * purchase to be completed successfully.
+ * purchase to be confirmed successfully.
  *
  * Related guide: <a href="https://docs.stripe.com/issuing/purchases/authorizations">Issued card authorizations</a>
  *
@@ -38,7 +38,7 @@ namespace Stripe\Issuing;
  * @property Transaction[] $transactions List of <a href="https://docs.stripe.com/api/issuing/transactions">transactions</a> associated with this authorization.
  * @property null|(object{received_credits: string[], received_debits: string[], transaction: null|string}&\Stripe\StripeObject) $treasury <a href="https://docs.stripe.com/api/treasury">Treasury</a> details related to this authorization if it was created on a <a href="https://docs.stripe.com/api/treasury/financial_accounts">FinancialAccount</a>.
  * @property (object{address_line1_check: string, address_postal_code_check: string, authentication_exemption: null|(object{claimed_by: string, type: string}&\Stripe\StripeObject), cvc_check: string, expiry_check: string, postal_code: null|string, three_d_secure: null|(object{result: string}&\Stripe\StripeObject)}&\Stripe\StripeObject) $verification_data
- * @property null|bool $verified_by_fraud_challenge Whether the authorization bypassed fraud risk checks because the cardholder has previously completed a fraud challenge on a similar high-risk authorization from the same merchant.
+ * @property null|bool $verified_by_fraud_challenge Whether the authorization bypassed fraud risk checks because the cardholder has previously confirmed a fraud challenge on a similar high-risk authorization from the same merchant.
  * @property null|string $wallet The digital wallet used for this transaction. One of <code>apple_pay</code>, <code>google_pay</code>, or <code>samsung_pay</code>. Will populate as <code>null</code> when no digital wallet was utilized.
  */
 class Authorization extends \Stripe\ApiResource

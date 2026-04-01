@@ -62,12 +62,12 @@
   background: transparent;
 }
 
-.crs-step-marker.completed {
+.crs-step-marker.confirmed {
   background: #10b981;
   color: white;
 }
 
-.crs-step-marker.completed:hover {
+.crs-step-marker.confirmed:hover {
   transform: scale(1.1);
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
 }
@@ -78,7 +78,7 @@
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
 }
 
-.crs-step-marker:not(.completed):not(.active) {
+.crs-step-marker:not(.confirmed):not(.active) {
   background: #e2e8f0;
   color: #64748b;
 }
@@ -109,7 +109,7 @@
   }
 }
 
-.crs-step-connector.completed {
+.crs-step-connector.confirmed {
   background: #10b981;
 }
 
@@ -157,7 +157,7 @@
   cursor: pointer;
 }
 
-.crs-progress-step.completed {
+.crs-progress-step.confirmed {
   background: #10b981;
 }
 
@@ -165,7 +165,7 @@
   background: #3b82f6;
 }
 
-.crs-progress-step:not(.completed):not(.active) {
+.crs-progress-step:not(.confirmed):not(.active) {
   background: #e2e8f0;
 }
 
@@ -882,18 +882,18 @@
   margin-bottom: 6px;
 }
 
-/* Completed State */
-.crs-step-completed {
+/* Confirmed State */
+.crs-step-confirmed {
   background-color: hsl(145, 65%, 42%); /* Green */
   color: white;
 }
 
-.crs-step-completed:hover {
+.crs-step-confirmed:hover {
   transform: scale(1.1);
   box-shadow: 0 0 0 3px hsla(145, 65%, 42%, 0.2);
 }
 
-.crs-step-completed svg {
+.crs-step-confirmed svg {
   stroke: white;
   width: 20px;
   height: 20px;
@@ -931,7 +931,7 @@
   transition: color 0.2s ease;
 }
 
-.crs-step-label-completed {
+.crs-step-label-confirmed {
   color: hsl(220, 10%, 45%); /* Dark gray */
 }
 
@@ -960,7 +960,7 @@
   }
 }
 
-.crs-connector-completed {
+.crs-connector-confirmed {
   background-color: hsl(145, 65%, 42%); /* Green */
 }
 
@@ -1017,7 +1017,7 @@
   cursor: pointer;
 }
 
-.crs-progress-completed {
+.crs-progress-confirmed {
   background-color: hsl(145, 65%, 42%); /* Green */
 }
 
@@ -1079,7 +1079,7 @@
   border: none;
   background-color: hsl(210 15% 95%);
 }
-.crs-step-item.completed-step button {
+.crs-step-item.confirmed-step button {
   background-color: hsl(145 65% 42%) !important;
 }
 .crs-step-item button {
@@ -1110,7 +1110,7 @@ button#crs-next-step {
   color: white !important;
   border-color: #3b82f6;
 }
-button.crs-step-marker.crs-step-completed {
+button.crs-step-marker.crs-step-confirmed {
   color: white !important;
 }
 .crs-diet-options {
@@ -1511,7 +1511,7 @@ button.crs-progress-step.crs-progress-active {
   background: #3b82f6 !important;
 }
 
-button.crs-progress-step.crs-progress-completed {
+button.crs-progress-step.crs-progress-confirmed {
   background-color: hsl(145 65% 42%) !important;
 }
 

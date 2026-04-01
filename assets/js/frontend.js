@@ -470,11 +470,11 @@
       var stepNum = index + 1; // 1-based index
 
       // Remove all status classes
-      item.removeClass("completed-step active-step pending-step");
+      item.removeClass("confirmed-step active-step pending-step");
 
       // Add appropriate class based on step comparison
       if (stepNum < currentStep) {
-        item.addClass("completed-step");
+        item.addClass("confirmed-step");
       } else if (stepNum == currentStep) {
         item.addClass("active-step");
       } else {
@@ -487,10 +487,10 @@
       var marker = $(this);
       var stepNum = index + 1;
 
-      marker.removeClass("crs-step-completed crs-step-active crs-step-pending");
+      marker.removeClass("crs-step-confirmed crs-step-active crs-step-pending");
 
       if (stepNum < currentStep) {
-        marker.addClass("crs-step-completed");
+        marker.addClass("crs-step-confirmed");
       } else if (stepNum == currentStep) {
         marker.addClass("crs-step-active");
       } else {
@@ -504,11 +504,11 @@
       var stepNum = index + 1;
 
       label.removeClass(
-        "crs-step-label-completed crs-step-label-active crs-step-label-pending",
+        "crs-step-label-confirmed crs-step-label-active crs-step-label-pending",
       );
 
       if (stepNum < currentStep) {
-        label.addClass("crs-step-label-completed");
+        label.addClass("crs-step-label-confirmed");
       } else if (stepNum == currentStep) {
         label.addClass("crs-step-label-active");
       } else {
@@ -522,11 +522,11 @@
       var stepNum = index + 1;
 
       connector.removeClass(
-        "crs-connector-completed crs-connector-active crs-connector-pending",
+        "crs-connector-confirmed crs-connector-active crs-connector-pending",
       );
 
       if (stepNum < currentStep) {
-        connector.addClass("crs-connector-completed");
+        connector.addClass("crs-connector-confirmed");
       } else if (stepNum == currentStep) {
         connector.addClass("crs-connector-active");
       } else {
@@ -540,11 +540,11 @@
       var stepNum = index + 1;
 
       progress.removeClass(
-        "crs-progress-completed crs-progress-active crs-progress-pending",
+        "crs-progress-confirmed crs-progress-active crs-progress-pending",
       );
 
       if (stepNum < currentStep) {
-        progress.addClass("crs-progress-completed");
+        progress.addClass("crs-progress-confirmed");
       } else if (stepNum == currentStep) {
         progress.addClass("crs-progress-active");
       } else {
@@ -619,7 +619,17 @@
 
         if (response.success) {
           console.log("Response success true");
+          // In loadStep function success callback, add this check for step 8
+          if (step === 8) {
+            console.log("Step 8 loaded - Congress ID:", congressId);
+            console.log("FormData Congress ID:", formData.congress_id);
 
+            // Ensure congress_id is in formData
+            if (!formData.congress_id || formData.congress_id === 0) {
+              formData.congress_id = congressId;
+              console.log("Fixed: Added congress_id to formData:", congressId);
+            }
+          }
           if (response.data) {
             console.log("Response data exists");
 
@@ -792,6 +802,15 @@
 
     if (stepData && Object.keys(stepData).length > 0) {
       formData = $.extend(formData, stepData);
+
+      // Always ensure congress_id is in formData
+      formData.congress_id = congressId;
+
+      console.log("saveCurrentStep - Step:", currentStep, "Data:", stepData);
+      console.log(
+        "saveCurrentStep - Congress ID in formData:",
+        formData.congress_id,
+      );
 
       // Save to localStorage after each step
       saveToLocalStorage();
@@ -1070,9 +1089,22 @@
   }
 
   function saveAllData(callback) {
+    // Make sure congress_id is always set
     formData.congress_id = congressId;
 
-    if (callback) {
+    // Also make sure we have the latest data from all steps
+    // Collect data from all steps 1-8 to ensure completeness
+    for (let step = 1; step <= 8; step++) {
+      const stepData = collectStepData(step);
+      if (stepData && Object.keys(stepData).length > 0) {
+        formData = $.extend(formData, stepData);
+      }
+    }
+
+    console.log("saveAllData - Final formData:", formData);
+    console.log("saveAllData - Congress ID:", formData.congress_id);
+
+    if (callback && typeof callback === "function") {
       callback();
     }
   }
@@ -1109,6 +1141,9 @@
           'input[name="registration_type_id"]:checked',
         ).val();
         data.add_sidi = $('input[name="add_sidi"]').is(":checked");
+
+        // Also ensure congress_id is in data
+        data.congress_id = congressId;
 
         var proofFileInput = $("#proof_file")[0];
         if (

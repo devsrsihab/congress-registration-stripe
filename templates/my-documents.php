@@ -26,7 +26,7 @@ function crs_my_documents_shortcode($atts) {
     $bookings_table = $wpdb->prefix . 'cr_bookings';
     $documents_table = $wpdb->prefix . 'cr_documents';
     
-    // Get all completed bookings for this user
+    // Get all confirmed bookings for this user
     $bookings = $wpdb->get_results($wpdb->prepare(
         "SELECT 
             b.*,
@@ -34,7 +34,7 @@ function crs_my_documents_shortcode($atts) {
             p.post_content AS congress_description
          FROM $bookings_table b
          INNER JOIN {$wpdb->posts} p ON b.congress_id = p.ID
-         WHERE b.user_id = %d AND b.booking_status = 'completed'
+         WHERE b.user_id = %d AND b.booking_status = 'confirmed'
          ORDER BY b.created_at DESC",
         $user_id
     ));
@@ -141,7 +141,6 @@ function crs_my_documents_shortcode($atts) {
         <div class="crs-docs-header">
             <h1 class="crs-docs-title">My Documents</h1>
             <div class="crs-user-badge">
-                <span class="crs-user-avatar">👤</span>
                 <span class="crs-user-name"><?php echo esc_html($current_user->display_name); ?></span>
             </div>
         </div>
@@ -225,203 +224,483 @@ function crs_my_documents_shortcode($atts) {
         <p>Loading documents...</p>
     </div>
     
-    <style>
-    /* Existing styles plus new additions */
+<style>
+/* ========================================
+   PROFESSIONAL MY DOCUMENTS DESIGN
+   ======================================== */
+
+/* Main Container */
+.crs-docs-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 24px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    color: #1e293b;
+}
+
+/* ========================================
+   HEADER SECTION
+   ======================================== */
+.crs-docs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #eef2ff;
+}
+
+.crs-docs-title {
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #1e293b 0%, #2271b1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+.crs-user-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f8fafc;
+    padding: 8px 20px 8px 12px;
+    border-radius: 60px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.crs-user-badge:hover {
+    border-color: #2271b1;
+    box-shadow: 0 2px 8px rgba(34,113,177,0.1);
+}
+
+.crs-user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: white;
+}
+
+.crs-user-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    text-transform: uppercase;
+}
+
+/* ========================================
+   CONGRESS SECTION
+   ======================================== */
+.crs-congress-section {
+    margin: 32px 0 20px 0;
+    padding: 0 0 12px 0;
+    border-bottom: 3px solid #2271b1;
+    display: inline-block;
+}
+
+.crs-congress-heading {
+    font-size: 20px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.crs-congress-heading::before {
+    content: '📁';
+    font-size: 22px;
+}
+
+/* ========================================
+   DOCUMENTS CARD - MODERN DESIGN
+   ======================================== */
+.crs-doc-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    background: #ffffff;
+    border: 1px solid #eef2ff;
+    border-radius: 16px;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.crs-doc-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.crs-doc-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.12);
+    border-color: #cbd5e1;
+}
+
+.crs-doc-row:hover::before {
+    opacity: 1;
+}
+
+/* Proof Document Highlight */
+.crs-proof-doc {
+    background: linear-gradient(135deg, #fef9e8 0%, #fff8f0 100%);
+    border-color: #ffe4b5;
+}
+
+.crs-proof-doc::before {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    opacity: 1;
+    width: 4px;
+}
+
+/* Document Icon */
+.crs-doc-icon {
+    width: 52px;
+    height: 52px;
+    background: #f1f5f9;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.crs-proof-doc .crs-doc-icon {
+    background: #fef3c7;
+}
+
+.crs-doc-row:hover .crs-doc-icon {
+    transform: scale(1.05);
+}
+
+/* Document Name */
+.crs-doc-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    text-transform: capitalize;
+}
+
+/* Document Badge */
+.crs-doc-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 6px rgba(245,158,11,0.2);
+}
+
+/* Action Button */
+.crs-doc-action {
+    flex-shrink: 0;
+}
+
+.crs-doc-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+}
+
+.crs-doc-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(34,113,177,0.3);
+    background: linear-gradient(135deg, #135e96 0%, #0f4a75 100%);
+}
+
+.crs-doc-link:active {
+    transform: translateY(0);
+}
+
+/* Download button style for proof docs */
+.crs-proof-doc .crs-doc-link {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.crs-proof-doc .crs-doc-link:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    box-shadow: 0 6px 14px rgba(245,158,11,0.3);
+}
+
+/* Disabled link */
+.crs-doc-link.disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+}
+
+/* ========================================
+   PAGINATION
+   ======================================== */
+.crs-pagination {
+    margin-top: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 0;
+    border-top: 1px solid #eef2ff;
+}
+
+.crs-page-btn {
+    padding: 10px 24px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 40px;
+    color: #475569;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.crs-page-btn:hover:not(:disabled) {
+    background: #2271b1;
+    border-color: #2271b1;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(34,113,177,0.2);
+}
+
+.crs-page-btn.disabled,
+.crs-page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: #f1f5f9;
+}
+
+.crs-page-info {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+    background: #f8fafc;
+    padding: 8px 20px;
+    border-radius: 40px;
+}
+
+/* ========================================
+   EMPTY STATE
+   ======================================== */
+.crs-docs-empty {
+    text-align: center;
+    padding: 80px 40px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 24px;
+    border: 1px solid #eef2ff;
+}
+
+.crs-docs-empty p {
+    color: #64748b;
+    font-size: 16px;
+    margin: 0;
+}
+
+.crs-docs-empty::before {
+    content: '📭';
+    font-size: 64px;
+    display: block;
+    margin-bottom: 20px;
+    opacity: 0.6;
+}
+
+/* ========================================
+   LOADING SPINNER
+   ======================================== */
+#crs-docs-loading {
+    text-align: center;
+    padding: 60px;
+}
+
+.crs-spinner {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    border: 3px solid #eef2ff;
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    animation: crs-spin 0.8s linear infinite;
+    margin-bottom: 16px;
+}
+
+@keyframes crs-spin {
+    to { transform: rotate(360deg); }
+}
+
+#crs-docs-loading p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ========================================
+   ERROR STATE
+   ======================================== */
+.crs-docs-error {
+    text-align: center;
+    padding: 60px 40px;
+    background: #fff5f5;
+    border-radius: 24px;
+    border: 1px solid #fed7d7;
+    color: #c53030;
+    font-size: 16px;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 768px) {
+    .crs-docs-container {
+        padding: 0 16px;
+        margin: 24px auto;
+    }
+    
+    .crs-docs-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+    
+    .crs-docs-title {
+        font-size: 26px;
+    }
+    
     .crs-doc-row {
-        display: flex;
-        align-items: center;
-        padding: 12px 0;
-        border-bottom: 1px solid #eaeef2;
-        transition: background-color 0.2s;
-    }
-    
-    .crs-doc-row:hover {
-        background-color: #f9fbfd;
-    }
-    
-    .crs-proof-doc {
-        background-color: #f0f9ff;
-        border-left: 3px solid #2271b1;
+        flex-wrap: wrap;
+        padding: 16px;
+        gap: 12px;
     }
     
     .crs-doc-icon {
-        width: 40px;
-        font-size: 20px;
-        text-align: center;
-        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        font-size: 22px;
     }
     
     .crs-doc-name {
-        flex: 1;
-        font-size: 15px;
-        color: #1e293b;
-        padding: 0 10px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
-    
-    .crs-doc-badge {
-        background: #2271b1;
-        color: white;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
+        width: calc(100% - 56px);
+        font-size: 14px;
     }
     
     .crs-doc-action {
-        width: 100px;
-        flex-shrink: 0;
-        text-align: right;
+        width: 100%;
+        margin-left: 56px;
     }
     
     .crs-doc-link {
-        display: inline-block;
-        padding: 6px 16px;
-        background: #f0f7ff;
-        color: #2271b1;
-        text-decoration: none;
-        border-radius: 20px;
-        font-size: 13px;
-        font-weight: 500;
-        transition: all 0.2s;
-        border: 1px solid #d4e4ff;
-    }
-    
-    .crs-doc-link:hover {
-        background: #2271b1;
-        color: white;
-        border-color: #2271b1;
-    }
-    
-    .crs-doc-link.disabled {
-        background: #f1f5f9;
-        color: #94a3b8;
-        border-color: #e2e8f0;
-        cursor: not-allowed;
-        pointer-events: none;
-    }
-    
-    /* AJAX Pagination Styles */
-    .crs-pagination {
-        margin-top: 40px;
-        display: flex;
+        width: 100%;
         justify-content: center;
-        align-items: center;
-        gap: 20px;
+        padding: 10px 20px;
+    }
+    
+    .crs-pagination {
+        flex-direction: column;
+        gap: 12px;
     }
     
     .crs-page-btn {
-        padding: 10px 20px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        color: #1e293b;
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
+        width: 100%;
+        justify-content: center;
     }
     
-    .crs-page-btn:hover:not(:disabled) {
-        background: #f1f5f9;
-        border-color: #2271b1;
-        color: #2271b1;
+    .crs-congress-heading {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .crs-docs-container {
+        padding: 0 12px;
     }
     
-    .crs-page-btn.disabled,
-    .crs-page-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        pointer-events: none;
+    .crs-docs-title {
+        font-size: 22px;
     }
     
-    .crs-page-info {
-        font-size: 14px;
-        color: #64748b;
+    .crs-user-badge {
+        width: 100%;
+        justify-content: center;
     }
     
-    /* Loading Spinner */
-    .crs-spinner {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #2271b1;
-        border-radius: 50%;
-        animation: crs-spin 1s linear infinite;
-        margin-bottom: 10px;
+    .crs-doc-row {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
     }
     
-    @keyframes crs-spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    .crs-doc-icon {
+        width: 48px;
+        height: 48px;
     }
     
-    /* Responsive */
-    @media (max-width: 768px) {
-        .crs-doc-row {
-            flex-wrap: wrap;
-            padding: 15px 0;
-        }
-        
-        .crs-doc-icon {
-            width: auto;
-            margin-right: 15px;
-        }
-        
-        .crs-doc-name {
-            width: calc(100% - 120px);
-            padding: 0;
-        }
-        
-        .crs-doc-action {
-            width: 100%;
-            text-align: left;
-            margin-top: 10px;
-            margin-left: 55px;
-        }
-        
-        .crs-doc-link {
-            width: 100%;
-            text-align: center;
-        }
-        
-        .crs-pagination {
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .crs-page-btn {
-            width: 100%;
-        }
+    .crs-doc-name {
+        width: 100%;
+        margin-left: 0;
     }
     
-    @media (max-width: 480px) {
-        .crs-doc-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        
-        .crs-doc-icon {
-            margin-right: 0;
-        }
-        
-        .crs-doc-name {
-            width: 100%;
-        }
-        
-        .crs-doc-action {
-            width: 100%;
-            margin-left: 0;
-        }
+    .crs-doc-action {
+        width: 100%;
+        margin-left: 0;
     }
-    </style>
+    
+    .crs-congress-heading {
+        font-size: 16px;
+    }
+    
+    .crs-pagination {
+        gap: 10px;
+    }
+}
+</style>
     
     <script>
     jQuery(document).ready(function($) {

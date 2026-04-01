@@ -82,7 +82,7 @@ class Event extends ApiResource
     const CHARGE_UPDATED = 'charge.updated';
     const CHECKOUT_SESSION_ASYNC_PAYMENT_FAILED = 'checkout.session.async_payment_failed';
     const CHECKOUT_SESSION_ASYNC_PAYMENT_SUCCEEDED = 'checkout.session.async_payment_succeeded';
-    const CHECKOUT_SESSION_COMPLETED = 'checkout.session.completed';
+    const CHECKOUT_SESSION_COMPLETED = 'checkout.session.confirmed';
     const CHECKOUT_SESSION_EXPIRED = 'checkout.session.expired';
     const CLIMATE_ORDER_CANCELED = 'climate.order.canceled';
     const CLIMATE_ORDER_CREATED = 'climate.order.created';
@@ -249,7 +249,7 @@ class Event extends ApiResource
     const SOURCE_TRANSACTION_UPDATED = 'source.transaction.updated';
     const SUBSCRIPTION_SCHEDULE_ABORTED = 'subscription_schedule.aborted';
     const SUBSCRIPTION_SCHEDULE_CANCELED = 'subscription_schedule.canceled';
-    const SUBSCRIPTION_SCHEDULE_COMPLETED = 'subscription_schedule.completed';
+    const SUBSCRIPTION_SCHEDULE_COMPLETED = 'subscription_schedule.confirmed';
     const SUBSCRIPTION_SCHEDULE_CREATED = 'subscription_schedule.created';
     const SUBSCRIPTION_SCHEDULE_EXPIRING = 'subscription_schedule.expiring';
     const SUBSCRIPTION_SCHEDULE_RELEASED = 'subscription_schedule.released';
@@ -275,7 +275,7 @@ class Event extends ApiResource
     const TRANSFER_UPDATED = 'transfer.updated';
     const TREASURY_CREDIT_REVERSAL_CREATED = 'treasury.credit_reversal.created';
     const TREASURY_CREDIT_REVERSAL_POSTED = 'treasury.credit_reversal.posted';
-    const TREASURY_DEBIT_REVERSAL_COMPLETED = 'treasury.debit_reversal.completed';
+    const TREASURY_DEBIT_REVERSAL_COMPLETED = 'treasury.debit_reversal.confirmed';
     const TREASURY_DEBIT_REVERSAL_CREATED = 'treasury.debit_reversal.created';
     const TREASURY_DEBIT_REVERSAL_INITIAL_CREDIT_GRANTED = 'treasury.debit_reversal.initial_credit_granted';
     const TREASURY_FINANCIAL_ACCOUNT_CLOSED = 'treasury.financial_account.closed';
@@ -343,7 +343,7 @@ class Event extends ApiResource
     const TYPE_CHARGE_UPDATED = 'charge.updated';
     const TYPE_CHECKOUT_SESSION_ASYNC_PAYMENT_FAILED = 'checkout.session.async_payment_failed';
     const TYPE_CHECKOUT_SESSION_ASYNC_PAYMENT_SUCCEEDED = 'checkout.session.async_payment_succeeded';
-    const TYPE_CHECKOUT_SESSION_COMPLETED = 'checkout.session.completed';
+    const TYPE_CHECKOUT_SESSION_COMPLETED = 'checkout.session.confirmed';
     const TYPE_CHECKOUT_SESSION_EXPIRED = 'checkout.session.expired';
     const TYPE_CLIMATE_ORDER_CANCELED = 'climate.order.canceled';
     const TYPE_CLIMATE_ORDER_CREATED = 'climate.order.created';
@@ -510,7 +510,7 @@ class Event extends ApiResource
     const TYPE_SOURCE_TRANSACTION_UPDATED = 'source.transaction.updated';
     const TYPE_SUBSCRIPTION_SCHEDULE_ABORTED = 'subscription_schedule.aborted';
     const TYPE_SUBSCRIPTION_SCHEDULE_CANCELED = 'subscription_schedule.canceled';
-    const TYPE_SUBSCRIPTION_SCHEDULE_COMPLETED = 'subscription_schedule.completed';
+    const TYPE_SUBSCRIPTION_SCHEDULE_COMPLETED = 'subscription_schedule.confirmed';
     const TYPE_SUBSCRIPTION_SCHEDULE_CREATED = 'subscription_schedule.created';
     const TYPE_SUBSCRIPTION_SCHEDULE_EXPIRING = 'subscription_schedule.expiring';
     const TYPE_SUBSCRIPTION_SCHEDULE_RELEASED = 'subscription_schedule.released';
@@ -536,7 +536,7 @@ class Event extends ApiResource
     const TYPE_TRANSFER_UPDATED = 'transfer.updated';
     const TYPE_TREASURY_CREDIT_REVERSAL_CREATED = 'treasury.credit_reversal.created';
     const TYPE_TREASURY_CREDIT_REVERSAL_POSTED = 'treasury.credit_reversal.posted';
-    const TYPE_TREASURY_DEBIT_REVERSAL_COMPLETED = 'treasury.debit_reversal.completed';
+    const TYPE_TREASURY_DEBIT_REVERSAL_COMPLETED = 'treasury.debit_reversal.confirmed';
     const TYPE_TREASURY_DEBIT_REVERSAL_CREATED = 'treasury.debit_reversal.created';
     const TYPE_TREASURY_DEBIT_REVERSAL_INITIAL_CREDIT_GRANTED = 'treasury.debit_reversal.initial_credit_granted';
     const TYPE_TREASURY_FINANCIAL_ACCOUNT_CLOSED = 'treasury.financial_account.closed';

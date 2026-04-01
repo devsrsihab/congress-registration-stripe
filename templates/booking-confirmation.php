@@ -106,7 +106,7 @@ function crs_booking_confirmation_shortcode($atts) {
                 </svg>
             </div>
             <h1 class="crs-confirmation-title">Booking Confirmed!</h1>
-            <p class="crs-confirmation-subtitle">Thank you for your registration. Your booking has been successfully completed.</p>
+            <p class="crs-confirmation-subtitle">Thank you for your registration. Your booking has been successfully confirmed.</p>
         </div>
         
         <!-- Booking Info Cards -->
@@ -125,7 +125,7 @@ function crs_booking_confirmation_shortcode($atts) {
                     </div>
                     <div class="crs-info-row">
                         <span class="crs-info-label">Status:</span>
-                        <span class="crs-info-value crs-status-badge crs-status-completed">Completed</span>
+                        <span class="crs-info-value crs-status-badge crs-status-confirmed">Confirmed</span>
                     </div>
                     <div class="crs-info-row">
                         <span class="crs-info-label">Date:</span>
@@ -437,7 +437,7 @@ function crs_booking_confirmation_shortcode($atts) {
         font-weight: 600;
     }
     
-    .crs-status-completed {
+    .crs-status-confirmed {
         background: #d1fae5;
         color: #065f46;
     }

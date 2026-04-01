@@ -86,7 +86,7 @@ class CR_Dashboard {
                 $table_name = $wpdb->prefix . 'cr_bookings';
                 $total_bookings = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
                 $pending_bookings = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE booking_status = 'pending'");
-                $completed_bookings = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE booking_status = 'completed'");
+                $completed_bookings = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE booking_status = 'confirmed'");
                 ?>
                 
                 <div class="cr-stat-card">
@@ -126,7 +126,7 @@ class CR_Dashboard {
                     <div class="cr-stat-icon">✅</div>
                     <div class="cr-stat-content">
                         <h3><?php echo $completed_bookings; ?></h3>
-                        <p><?php _e('Completed', CR_TEXT_DOMAIN); ?></p>
+                        <p><?php _e('Confirmed', CR_TEXT_DOMAIN); ?></p>
                     </div>
                 </div>
             </div>
@@ -251,7 +251,7 @@ class CR_Dashboard {
                 background: #fff3cd;
                 color: #856404;
             }
-            .cr-status-completed {
+            .cr-status-confirmed {
                 background: #d4edda;
                 color: #155724;
             }

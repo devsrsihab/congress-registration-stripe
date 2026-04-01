@@ -14,7 +14,7 @@ namespace Stripe;
  * @property null|Application|string $application ID of the Connect Application that created the schedule.
  * @property (object{flexible: null|(object{proration_discounts?: string}&StripeObject), type: string, updated_at?: int}&StripeObject) $billing_mode The billing mode of the subscription.
  * @property null|int $canceled_at Time at which the subscription schedule was canceled. Measured in seconds since the Unix epoch.
- * @property null|int $completed_at Time at which the subscription schedule was completed. Measured in seconds since the Unix epoch.
+ * @property null|int $completed_at Time at which the subscription schedule was confirmed. Measured in seconds since the Unix epoch.
  * @property int $created Time at which the object was created. Measured in seconds since the Unix epoch.
  * @property null|(object{end_date: int, start_date: int}&StripeObject) $current_phase Object representing the start and end dates for the current phase of the subscription schedule, if it is <code>active</code>.
  * @property Customer|string $customer ID of the customer who owns the subscription schedule.
@@ -26,7 +26,7 @@ namespace Stripe;
  * @property ((object{add_invoice_items: ((object{discounts: ((object{coupon: null|Coupon|string, discount: null|Discount|string, promotion_code: null|PromotionCode|string}&StripeObject))[], metadata: null|StripeObject, period: (object{end: (object{timestamp?: int, type: string}&StripeObject), start: (object{timestamp?: int, type: string}&StripeObject)}&StripeObject), price: Price|string, quantity: null|int, tax_rates?: null|TaxRate[]}&StripeObject))[], application_fee_percent: null|float, automatic_tax?: (object{disabled_reason: null|string, enabled: bool, liability: null|(object{account?: Account|string, type: string}&StripeObject)}&StripeObject), billing_cycle_anchor: null|string, billing_thresholds: null|(object{amount_gte: null|int, reset_billing_cycle_anchor: null|bool}&StripeObject), collection_method: null|string, currency: string, default_payment_method: null|PaymentMethod|string, default_tax_rates?: null|TaxRate[], description: null|string, discounts: ((object{coupon: null|Coupon|string, discount: null|Discount|string, promotion_code: null|PromotionCode|string}&StripeObject))[], end_date: int, invoice_settings: null|(object{account_tax_ids: null|(string|TaxId)[], days_until_due: null|int, issuer: null|(object{account?: Account|string, type: string}&StripeObject)}&StripeObject), items: ((object{billing_thresholds: null|(object{usage_gte: null|int}&StripeObject), discounts: ((object{coupon: null|Coupon|string, discount: null|Discount|string, promotion_code: null|PromotionCode|string}&StripeObject))[], metadata: null|StripeObject, plan: Plan|string, price: Price|string, quantity?: int, tax_rates?: null|TaxRate[]}&StripeObject))[], metadata: null|StripeObject, on_behalf_of: null|Account|string, proration_behavior: string, start_date: int, transfer_data: null|(object{amount_percent: null|float, destination: Account|string}&StripeObject), trial_end: null|int}&StripeObject))[] $phases Configuration for the subscription schedule's phases.
  * @property null|int $released_at Time at which the subscription schedule was released. Measured in seconds since the Unix epoch.
  * @property null|string $released_subscription ID of the subscription once managed by the subscription schedule (if it is released).
- * @property string $status The present status of the subscription schedule. Possible values are <code>not_started</code>, <code>active</code>, <code>completed</code>, <code>released</code>, and <code>canceled</code>. You can read more about the different states in our <a href="https://docs.stripe.com/billing/subscriptions/subscription-schedules">behavior guide</a>.
+ * @property string $status The present status of the subscription schedule. Possible values are <code>not_started</code>, <code>active</code>, <code>confirmed</code>, <code>released</code>, and <code>canceled</code>. You can read more about the different states in our <a href="https://docs.stripe.com/billing/subscriptions/subscription-schedules">behavior guide</a>.
  * @property null|string|Subscription $subscription ID of the subscription managed by the subscription schedule.
  * @property null|string|TestHelpers\TestClock $test_clock ID of the test clock this subscription schedule belongs to.
  */
@@ -43,7 +43,7 @@ class SubscriptionSchedule extends ApiResource
 
     const STATUS_ACTIVE = 'active';
     const STATUS_CANCELED = 'canceled';
-    const STATUS_COMPLETED = 'completed';
+    const STATUS_COMPLETED = 'confirmed';
     const STATUS_NOT_STARTED = 'not_started';
     const STATUS_RELEASED = 'released';
 

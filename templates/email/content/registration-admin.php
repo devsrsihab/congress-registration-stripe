@@ -44,7 +44,7 @@ include CRS_PLUGIN_DIR . 'templates/email/parts/button.php';
                         </tr>
                         <tr>
                             <td style="font-size:14px; color:#4b677d;">Status</td>
-                            <td style="font-size:15px; color:#1763cf;">Completed</td>
+                            <td style="font-size:15px; color:#1763cf;">Confirmed</td>
                         </tr>
                     </table>
                 </td>

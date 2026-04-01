@@ -152,8 +152,8 @@ $column_names = array();
                 $label_class = 'crs-step-label';
                 
                 if ($step_num < $current_step) {
-                    $marker_class .= ' completed';
-                    $connector_class .= ' completed';
+                    $marker_class .= ' confirmed';
+                    $connector_class .= ' confirmed';
                 } elseif ($step_num == $current_step) {
                     $marker_class .= ' active';
                     $label_class .= ' active';
@@ -186,7 +186,7 @@ $column_names = array();
             <div class="crs-progress-bar">
                 <?php for ($i = 1; $i <= 8; $i++): ?>
                 <button type="button" 
-                        class="crs-progress-step <?php echo $i < $current_step ? 'completed' : ($i == $current_step ? '' : ''); ?>"
+                        class="crs-progress-step <?php echo $i < $current_step ? 'confirmed' : ($i == $current_step ? '' : ''); ?>"
                         data-step="<?php echo $i; ?>">
                 </button>
                 <?php endfor; ?>

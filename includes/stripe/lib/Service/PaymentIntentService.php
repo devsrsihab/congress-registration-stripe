@@ -135,7 +135,7 @@ class PaymentIntentService extends AbstractService
      * attempts must be initiated using a secret key.
      *
      * If any actions are required for the payment, the PaymentIntent will return to
-     * the <code>requires_confirmation</code> state after those actions are completed.
+     * the <code>requires_confirmation</code> state after those actions are confirmed.
      * Your server needs to then explicitly re-confirm the PaymentIntent to initiate
      * the next payment attempt.
      *

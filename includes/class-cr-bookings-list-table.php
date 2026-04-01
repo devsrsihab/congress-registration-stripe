@@ -36,7 +36,7 @@ class CR_Bookings_List_Table extends WP_List_Table {
     public function get_bulk_actions() {
         return array(
             'delete' => __('Delete', CR_TEXT_DOMAIN),
-            'mark_completed' => __('Mark as Completed', CR_TEXT_DOMAIN),
+            'mark_completed' => __('Mark as Confirmed', CR_TEXT_DOMAIN),
             'mark_cancelled' => __('Mark as Cancelled', CR_TEXT_DOMAIN)
         );
     }
@@ -176,14 +176,14 @@ class CR_Bookings_List_Table extends WP_List_Table {
                 foreach ($bookings as $booking_id) {
                     $wpdb->update(
                         $table_name,
-                        array('booking_status' => 'completed'),
+                        array('booking_status' => 'confirmed'),
                         array('id' => $booking_id),
                         array('%s'),
                         array('%d')
                     );
                 }
                 
-                echo '<div class="notice notice-success"><p>' . __('Bookings marked as completed.', CR_TEXT_DOMAIN) . '</p></div>';
+                echo '<div class="notice notice-success"><p>' . __('Bookings marked as confirmed.', CR_TEXT_DOMAIN) . '</p></div>';
             }
         }
     }
@@ -195,14 +195,14 @@ class CR_Bookings_List_Table extends WP_List_Table {
                 <select name="filter_status">
                     <option value=""><?php _e('All statuses', CR_TEXT_DOMAIN); ?></option>
                     <option value="pending"><?php _e('Pending', CR_TEXT_DOMAIN); ?></option>
-                    <option value="completed"><?php _e('Completed', CR_TEXT_DOMAIN); ?></option>
+                    <option value="confirmed"><?php _e('Confirmed', CR_TEXT_DOMAIN); ?></option>
                     <option value="cancelled"><?php _e('Cancelled', CR_TEXT_DOMAIN); ?></option>
                 </select>
                 
                 <select name="filter_payment">
                     <option value=""><?php _e('All payments', CR_TEXT_DOMAIN); ?></option>
                     <option value="pending"><?php _e('Pending', CR_TEXT_DOMAIN); ?></option>
-                    <option value="completed"><?php _e('Completed', CR_TEXT_DOMAIN); ?></option>
+                    <option value="confirmed"><?php _e('Confirmed', CR_TEXT_DOMAIN); ?></option>
                     <option value="failed"><?php _e('Failed', CR_TEXT_DOMAIN); ?></option>
                 </select>
                 

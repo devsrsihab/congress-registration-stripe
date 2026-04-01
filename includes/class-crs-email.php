@@ -336,7 +336,7 @@ class CRS_Email {
             
             'booking_number' => 'CR-123456789',
             'booking_date' => date_i18n(get_option('date_format')),
-            'payment_status' => 'completed',
+            'payment_status' => 'confirmed',
             'total_amount' => wc_price(375),
             
             'invoice_number' => 'INV-2026-001',
@@ -539,7 +539,7 @@ class CRS_Email {
                 <p>You can view your registration details in your account dashboard.</p>
                 
                 <p style="margin-top: 30px; text-align: center;">
-                    <a href="{site_url}/my-registrations/" class="button">View My Registrations</a>
+                    <a href="{site_url}/account/" class="button">View My Registrations</a>
                 </p>',
                 
             'registration_admin' => '<h2>New Registration</h2>
@@ -584,7 +584,7 @@ class CRS_Email {
                 <p>Please try again or contact support if you need assistance.</p>
                 
                 <p style="margin-top: 30px; text-align: center;">
-                    <a href="{site_url}/my-registrations/" class="button">Try Again</a>
+                    <a href="{site_url}/account/" class="button">Try Again</a>
                 </p>',
         ];
         
