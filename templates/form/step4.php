@@ -1,75 +1,109 @@
 <?php 
 
 
-    global $wpdb;
+global $wpdb;
 
-    
-    // Use the correct table
-    $table_name = $wpdb->prefix . 'jet_rel_default';
-    $related_hotels = array();
-    
-    // Get column names
-    $columns = $wpdb->get_results("SHOW COLUMNS FROM {$table_name}");
-    $parent_col = '';
-    $child_col = '';
-    
-    foreach ($columns as $column) {
-        if (in_array($column->Field, ['parent_object_id', 'parent_id', 'from_object_id'])) {
-            $parent_col = $column->Field;
-        }
-        if (in_array($column->Field, ['child_object_id', 'child_id', 'to_object_id'])) {
-            $child_col = $column->Field;
-        }
+// Get speaker status from data
+$is_speaker = isset($data['is_speaker']) && $data['is_speaker'] === 'Yes' ? true : false;
+error_log("Step 4 - Speaker status: " . ($is_speaker ? 'Yes' : 'No'));
+error_log("Step 4 - Data: " . print_r($data, true));
+
+// Use the correct table
+$table_name = $wpdb->prefix . 'jet_rel_default';
+$related_hotels = array();
+
+// Get column names
+$columns = $wpdb->get_results("SHOW COLUMNS FROM {$table_name}");
+$parent_col = '';
+$child_col = '';
+
+foreach ($columns as $column) {
+    if (in_array($column->Field, ['parent_object_id', 'parent_id', 'from_object_id'])) {
+        $parent_col = $column->Field;
     }
+    if (in_array($column->Field, ['child_object_id', 'child_id', 'to_object_id'])) {
+        $child_col = $column->Field;
+    }
+}
+
+if ($parent_col && $child_col) {
+    // Try to get child IDs (hotels) where parent is congress
+    $related_ids = $wpdb->get_col($wpdb->prepare(
+        "SELECT {$child_col} FROM {$table_name} WHERE {$parent_col} = %d",
+        $congress_id
+    ));
     
-    if ($parent_col && $child_col) {
-        // Try to get child IDs (hotels) where parent is congress
+    // If no results, try reverse
+    if (empty($related_ids)) {
         $related_ids = $wpdb->get_col($wpdb->prepare(
-            "SELECT {$child_col} FROM {$table_name} WHERE {$parent_col} = %d",
+            "SELECT {$parent_col} FROM {$table_name} WHERE {$child_col} = %d",
             $congress_id
         ));
-        
-        // If no results, try reverse
-        if (empty($related_ids)) {
-            $related_ids = $wpdb->get_col($wpdb->prepare(
-                "SELECT {$parent_col} FROM {$table_name} WHERE {$child_col} = %d",
-                $congress_id
-            ));
-        }
-        
-        if (!empty($related_ids)) {
-            $related_hotels = get_posts(array(
-                'post_type' => 'hotels',
-                'post__in' => $related_ids,
-                'posts_per_page' => -1,
-                'post_status' => 'publish'
-            ));
-        }
     }
     
-    // Get congress dates
-    $start_date = get_post_meta($congress_id, 'start_date', true);
-    $end_date = get_post_meta($congress_id, 'end_date', true);
-    
-    // Convert dates to timestamps
-    $start_timestamp = $start_date;
-    $end_timestamp = $end_date;
+    if (!empty($related_ids)) {
+        $related_hotels = get_posts(array(
+            'post_type' => 'hotels',
+            'post__in' => $related_ids,
+            'posts_per_page' => -1,
+            'post_status' => 'publish'
+        ));
+    }
+}
 
-
-    error_log("start_timestamp ID: {$start_timestamp}");
-    // Get current month from start date
-    $current_month = date('n', $start_timestamp);
-    $current_year = date('Y', $start_timestamp);
+// Filter hotels based on speaker status
+$filtered_hotels = array();
+foreach ($related_hotels as $hotel) {
+    $only_for_speaker = get_post_meta($hotel->ID, 'only_for_speaker', true);
+    error_log("Step 4 - Hotel ID: {$hotel->ID}, only_for_speaker: {$only_for_speaker}");
     
-    // Create array of allowed dates
-    $allowed_dates = array();
-    $current = $start_timestamp;
-    while ($current <= $end_timestamp) {
-        $allowed_dates[] = date('Y-m-d', $current);
-        $current = strtotime('+1 day', $current);
+    // If hotel is only for speakers and user is NOT speaker, skip this hotel
+    if ($only_for_speaker == 'Yes' && !$is_speaker) {
+        error_log("Step 4 - Skipping hotel {$hotel->ID} - speaker only");
+        continue;
     }
     
-    ob_start();
+    $filtered_hotels[] = $hotel;
+}
+
+// Replace related_hotels with filtered list
+$related_hotels = $filtered_hotels;
+error_log("Step 4 - Filtered hotels count: " . count($related_hotels));
+
+// Get congress dates
+$start_date = get_post_meta($congress_id, 'start_date', true);
+$end_date = get_post_meta($congress_id, 'end_date', true);
+
+// Convert dates to timestamps
+$start_timestamp = strtotime($start_date);
+$end_timestamp = strtotime($end_date);
+
+error_log("Step 4 - Congress dates: {$start_date} to {$end_date}");
+
+// Get current month from start date
+$current_month = date('n', $start_timestamp);
+$current_year = date('Y', $start_timestamp);
+
+// Create array of allowed dates
+$allowed_dates = array();
+$current = $start_timestamp;
+while ($current <= $end_timestamp) {
+    $allowed_dates[] = date('Y-m-d', $current);
+    $current = strtotime('+1 day', $current);
+}
+
+ob_start();
+
+
+
+
+
+
+
+
+
+
+
     ?>
     <div class="crs-step-content">
         <h2 class="crs-step-title"><?php _e('Accommodation', 'crscngres'); ?></h2>

@@ -86,8 +86,90 @@ ob_start();
         <input type="hidden" id="proof_file_name_hidden" name="proof_file_name_hidden" value="<?php echo esc_attr($proof_file_name); ?>">
         <input type="hidden" id="proof_file_data_hidden" name="proof_file_data_hidden" value="">
     </div>
-</div>
 
+    <!-- Speaker Registration Option -->
+    <div class="crs-speaker-option" style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+        <div class="crs-speaker-header">
+            <h3 class="crs-speaker-title"><?php _e('Speaker Registration', 'crscngres'); ?></h3>
+            <p class="crs-speaker-description"><?php _e('Are you registering as a speaker for this congress?', 'crscngres'); ?></p>
+        </div>
+        
+        <div class="crs-speaker-radios" style="display: flex; gap: 20px; margin-top: 15px;">
+            <label class="crs-speaker-radio-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="is_speaker" value="Yes" id="speaker_yes" <?php echo isset($data['is_speaker']) && $data['is_speaker'] === 'Yes' ? 'checked' : ''; ?>>
+                <span class="crs-radio-custom"></span>
+                <span class="crs-speaker-text"><?php _e('Yes, I am a speaker', 'crscngres'); ?></span>
+            </label>
+            
+            <label class="crs-speaker-radio-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="is_speaker" value="No" id="speaker_no" <?php echo (!isset($data['is_speaker']) || $data['is_speaker'] === 'No') ? 'checked' : ''; ?>>
+                <span class="crs-radio-custom"></span>
+                <span class="crs-speaker-text"><?php _e('No, I am not a speaker', 'crscngres'); ?></span>
+            </label>
+        </div>
+    </div>
+
+
+
+</div>
+<style>
+/* Speaker Option Styles */
+.crs-speaker-option {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 25px;
+}
+
+.crs-speaker-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 5px 0;
+}
+
+.crs-speaker-description {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+}
+
+.crs-speaker-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 10px 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s;
+}
+
+.crs-speaker-radio-label:hover {
+    border-color: #2271b1;
+    background: #f0f9ff;
+}
+
+.crs-speaker-radio-label input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.crs-speaker-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+/* Selected state for speaker radio */
+.crs-speaker-radio-label:has(input:checked) {
+    border-color: #2271b1;
+    background: #e6f0fa;
+}
+</style>
 <script>
 jQuery(document).ready(function($) {
     // Restore file info from sessionStorage when page loads

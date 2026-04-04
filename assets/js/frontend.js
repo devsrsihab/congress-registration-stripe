@@ -807,6 +807,7 @@
       formData.congress_id = congressId;
 
       console.log("saveCurrentStep - Step:", currentStep, "Data:", stepData);
+      console.log("saveCurrentStep - Speaker status:", formData.is_speaker);
       console.log(
         "saveCurrentStep - Congress ID in formData:",
         formData.congress_id,
@@ -932,6 +933,11 @@
               );
             }
           }
+
+          // ========== SPEAKER VALIDATION (Optional) ==========
+          // No validation needed for speaker, but you can add if required
+          const isSpeaker = $('input[name="is_speaker"]:checked').val();
+          console.log("Speaker selection:", isSpeaker);
         }
         break;
 
@@ -1089,19 +1095,24 @@
   }
 
   function saveAllData(callback) {
-    // Make sure congress_id is always set
+    // Only collect data from the CURRENT step (step 8)
+    // Past steps are already in formData from when they were navigated
+    const currentStepData = collectStepData(currentStep);
+    if (currentStepData && Object.keys(currentStepData).length > 0) {
+      formData = $.extend(formData, currentStepData);
+    }
+
+    // Always ensure congress_id is set
     formData.congress_id = congressId;
 
-    // Also make sure we have the latest data from all steps
-    // Collect data from all steps 1-8 to ensure completeness
-    for (let step = 1; step <= 8; step++) {
-      const stepData = collectStepData(step);
-      if (stepData && Object.keys(stepData).length > 0) {
-        formData = $.extend(formData, stepData);
-      }
+    // Capture speaker value if we're past step 3
+    if (formData.is_speaker === undefined) {
+      formData.is_speaker = "No";
     }
 
     console.log("saveAllData - Final formData:", formData);
+    console.log("saveAllData - Diet:", formData.diet);
+    console.log("saveAllData - Allergy:", formData.allergy);
     console.log("saveAllData - Congress ID:", formData.congress_id);
 
     if (callback && typeof callback === "function") {
@@ -1142,8 +1153,13 @@
         ).val();
         data.add_sidi = $('input[name="add_sidi"]').is(":checked");
 
+        // ========== ADD SPEAKER STATUS ==========
+        data.is_speaker = $('input[name="is_speaker"]:checked').val() || "No";
+
         // Also ensure congress_id is in data
         data.congress_id = congressId;
+
+        console.log("Collecting step 3 data - is_speaker:", data.is_speaker);
 
         var proofFileInput = $("#proof_file")[0];
         if (
@@ -1169,18 +1185,32 @@
           data.meals.push($(this).val());
         });
 
+        // ========== FIXED DIET COLLECTION ==========
         data.diet = [];
         $('input[name="diet[]"]:checked').each(function () {
           data.diet.push($(this).val());
         });
 
+        // If nothing checked OR only "no" alongside others somehow, normalize
         if (data.diet.length === 0) {
           data.diet = ["no"];
         }
+        // If "no" is checked alongside real diet options, remove "no"
+        if (data.diet.length > 1 && data.diet.includes("no")) {
+          data.diet = data.diet.filter((v) => v !== "no");
+        }
 
         data.diet_other = $('input[name="diet_other"]').val();
-        data.allergy = $('input[name="allergy"]:checked').val() || "no";
+
+        // ========== FIXED ALLERGY COLLECTION ==========
+        // Read the radio that is actually checked in DOM right now
+        const $checkedAllergy = $('input[name="allergy"]:checked');
+        data.allergy = $checkedAllergy.length ? $checkedAllergy.val() : "no";
         data.allergy_details = $('input[name="allergy_details"]').val();
+
+        console.log("Step 5 Saved - Diet:", data.diet);
+        console.log("Step 5 Saved - Allergy:", data.allergy);
+        console.log("Step 5 Saved - Allergy Details:", data.allergy_details);
         break;
 
       case 6:
@@ -1215,9 +1245,14 @@
   function restoreFormData() {
     if (!formData) return;
 
-    for (let key in formData) {
-      const element = $(`[name="${key}"]`);
+    console.log("Restoring form data:", formData);
 
+    // Restore radio and checkbox values
+    for (let key in formData) {
+      // Skip diet[] - handled separately below to avoid name mismatch
+      if (key === "diet") continue;
+
+      const element = $(`[name="${key}"]`);
       if (element.length) {
         if (element.is(":radio")) {
           element.filter(`[value="${formData[key]}"]`).prop("checked", true);
@@ -1234,9 +1269,67 @@
         }
       }
     }
+
+    // ========== RESTORE DIET UI ==========
+    if (formData.diet) {
+      // First, remove all active classes
+      $(".crs-diet-btn").removeClass("active");
+      $('.crs-diet-btn input[type="checkbox"]').prop("checked", false);
+
+      // Then check the saved values
+      var dietArray = Array.isArray(formData.diet)
+        ? formData.diet
+        : [formData.diet];
+      dietArray.forEach(function (dietValue) {
+        var $checkbox = $(`input[name="diet[]"][value="${dietValue}"]`);
+        if ($checkbox.length) {
+          $checkbox.prop("checked", true);
+          $checkbox.closest(".crs-diet-btn").addClass("active");
+        }
+      });
+
+      // Handle other field visibility
+      if (dietArray.includes("other")) {
+        $("#diet-other-field").show();
+        $('input[name="diet_other"]').val(formData.diet_other || "");
+      } else {
+        $("#diet-other-field").hide();
+      }
+    }
+
+    // ========== RESTORE ALLERGY UI ==========
+    if (formData.allergy) {
+      if (formData.allergy === "yes") {
+        $('input[name="allergy"][value="yes"]').prop("checked", true);
+        $(".crs-allergy-label").removeClass("active");
+        $('input[name="allergy"][value="yes"]')
+          .closest(".crs-allergy-label")
+          .addClass("active");
+        $("#allergy-yes-field").show();
+        $('input[name="allergy_details"]').val(formData.allergy_details || "");
+      } else {
+        $('input[name="allergy"][value="no"]').prop("checked", true);
+        $(".crs-allergy-label").removeClass("active");
+        $('input[name="allergy"][value="no"]')
+          .closest(".crs-allergy-label")
+          .addClass("active");
+        $("#allergy-yes-field").hide();
+      }
+    }
+
+    // ========== RESTORE SPEAKER ==========
+    if (formData.is_speaker) {
+      if (formData.is_speaker === "Yes" || formData.is_speaker === "yes") {
+        $("#speaker_yes").prop("checked", true);
+      } else {
+        $("#speaker_no").prop("checked", true);
+      }
+    }
   }
 
   function updateUrlStep(step) {
+    console.log("form data from frontend", formData);
+
     // Check if we are on congress registration page
     const isCongressPage =
       $(".crs-registration-form").length > 0 ||

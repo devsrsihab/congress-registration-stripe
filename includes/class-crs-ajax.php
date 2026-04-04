@@ -468,8 +468,7 @@ private static function getStep8Html($congress_id, $data) {
         }
         $coupon_obj = new CRS_Coupon();
         $result = $coupon_obj->validate_coupon($data['applied_coupon_code'], $subtotal, get_current_user_id());
-        var_dump($result);
-        error_log($result);
+
         if ($result['valid']) {
             $applied_coupon = $result['coupon'];
             $discount_amount = $result['discount'];

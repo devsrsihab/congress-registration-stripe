@@ -111,11 +111,15 @@ class CRS_Payment {
             $subtotal += $price_per_night * $nights;
         }
         
+        // In calculateTotal(), replace the meals loop:
         if (!empty($data['meals']) && !empty($data['congress_id'])) {
             $meals = get_post_meta($data['congress_id'], 'congress_meals', true);
-            foreach ($data['meals'] as $meal_index) {
-                if (isset($meals[$meal_index])) {
-                    $subtotal += $meals[$meal_index]['meal_price'];
+            if (is_array($meals)) {
+                foreach ($data['meals'] as $meal_index) {
+                    $meal_key = is_array($meal_index) ? key($meal_index) : (string)$meal_index;
+                    if (isset($meals[$meal_key])) {
+                        $subtotal += floatval($meals[$meal_key]['meal_price']);
+                    }
                 }
             }
         }
@@ -410,19 +414,38 @@ public static function createBookingAfterPayment($data, $intent_id, $proof_file_
     return $new_booking_id;
 }
     
-    private static function decreaseWorkshopSeats($congress_id, $selected_workshops) {
-        $workshops = get_post_meta($congress_id, 'congress_workshop', true);
-        if (!is_array($workshops)) return;
-        
-        $updated = false;
-        foreach ($selected_workshops as $workshop_index) {
-            $search_index = is_string($workshop_index) && strpos($workshop_index, 'item-') === 0 ? $workshop_index : $workshop_index;
-        }
-        
-        if ($updated) {
-            update_post_meta($congress_id, 'congress_workshop', $workshops);
+private static function decreaseWorkshopSeats($congress_id, $selected_workshops) {
+    $workshops = get_post_meta($congress_id, 'congress_workshop', true);
+    if (!is_array($workshops)) return;
+
+    $updated = false;
+
+    foreach ($selected_workshops as $workshop_index) {
+        // Normalize the key — handle both array and string/int index
+        $key = is_array($workshop_index) ? key($workshop_index) : (string) $workshop_index;
+
+        if (isset($workshops[$key])) {
+            $current_seats = intval($workshops[$key]['total_seats_capacity']);
+
+            if ($current_seats > 0) {
+                $workshops[$key]['total_seats_capacity'] = $current_seats - 1;
+                $updated = true;
+
+                error_log('CRS: Workshop seat decreased - Key: ' . $key . 
+                          ', Remaining seats: ' . ($current_seats - 1));
+            } else {
+                error_log('CRS: Workshop seat NOT decreased (already 0) - Key: ' . $key);
+            }
+        } else {
+            error_log('CRS: Workshop key not found in meta - Key: ' . $key);
         }
     }
+
+    if ($updated) {
+        update_post_meta($congress_id, 'congress_workshop', $workshops);
+        error_log('CRS: Workshop seats updated in DB for congress: ' . $congress_id);
+    }
+}
     
     public static function saveBooking($data, $status = 'pending', $stripe_intent_id = '', $user_id = null) {
         global $wpdb;

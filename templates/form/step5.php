@@ -42,7 +42,7 @@
     ob_start();
     ?>
     <div class="crs-step-content">
-        <h2 class="crs-step-title"><?php _e('Lunches and Dinners', 'crscngres'); ?></h2>
+        <h2 class="crs-step-title"><?php _e('Lunches and Dinners sds', 'crscngres'); ?></h2>
         <p class="crs-step-description"><?php _e('Select the lunches and dinners you wish to attend', 'crscngres'); ?></p>
         
         <div class="crs-meals-list">
@@ -165,89 +165,135 @@
                 updateMealsTotal();
             });
             
-            // Diet checkbox handler - MULTIPLE SELECTION
+            // Diet checkbox handler - ensure "no" works correctly
             $('.crs-diet-btn').on('click', function(e) {
                 e.preventDefault();
                 
                 var $btn = $(this);
                 var $checkbox = $btn.find('input[type="checkbox"]');
-                var isChecked = $checkbox.prop('checked');
                 var checkboxValue = $checkbox.val();
+                var wasChecked = $checkbox.prop('checked');
                 
-                // Toggle checkbox state
-                $checkbox.prop('checked', !isChecked);
-                $btn.toggleClass('active', !isChecked);
-                
-                // Get all checked values
-                var selectedValues = [];
-                $('input[name="diet[]"]:checked').each(function() {
-                    selectedValues.push($(this).val());
-                });
-                
-                // Handle "No" logic
+                // Special handling for "No" option
                 if (checkboxValue === 'no') {
-                    if (!isChecked) { // Just checked "No"
-                        // Uncheck all other options
-                        $('.crs-diet-btn input[type="checkbox"]').not($checkbox).each(function() {
-                            $(this).prop('checked', false);
-                            $(this).closest('.crs-diet-btn').removeClass('active');
+                    if (!wasChecked) {
+                        // Checking "No" - uncheck all others
+                        $('.crs-diet-btn input[type="checkbox"]').each(function() {
+                            if ($(this).val() !== 'no') {
+                                $(this).prop('checked', false);
+                                $(this).closest('.crs-diet-btn').removeClass('active');
+                            }
                         });
-                        
-                        // Hide other field
+                        $checkbox.prop('checked', true);
+                        $btn.addClass('active');
                         $('#diet-other-field').slideUp();
                         $('input[name="diet_other"]').val('');
+                    } else {
+                        // Unchecking "No" - do nothing, but don't allow unchecking "No" if nothing else is checked
+                        var anyOtherChecked = $('.crs-diet-btn input[type="checkbox"]:checked').not('[value="no"]').length > 0;
+                        if (!anyOtherChecked) {
+                            // Keep "No" checked if nothing else is checked
+                            $checkbox.prop('checked', true);
+                            $btn.addClass('active');
+                        } else {
+                            $checkbox.prop('checked', false);
+                            $btn.removeClass('active');
+                        }
                     }
-                }
-                
-                // Handle "Other" logic
-                if (checkboxValue === 'other') {
-                    if (!isChecked) { // Just checked "Other"
-                        $('#diet-other-field').slideDown();
+                } else {
+                    // Handling non-"No" options
+                    if (!wasChecked) {
+                        $checkbox.prop('checked', true);
+                        $btn.addClass('active');
                         
-                        // If "No" was checked, uncheck it
+                        // If checking any non-"No", uncheck "No"
                         var $noCheckbox = $('.crs-diet-btn input[type="checkbox"][value="no"]');
                         if ($noCheckbox.prop('checked')) {
                             $noCheckbox.prop('checked', false);
                             $noCheckbox.closest('.crs-diet-btn').removeClass('active');
                         }
-                    } else { // Just unchecked "Other"
-                        // Check if any other "other" checkbox exists (shouldn't, but just in case)
-                        var otherChecked = $('input[name="diet[]"][value="other"]:checked').length > 0;
-                        if (!otherChecked) {
-                            $('#diet-other-field').slideUp();
-                            $('input[name="diet_other"]').val('');
+                        
+                        // Handle "Other" field
+                        if (checkboxValue === 'other') {
+                            $('#diet-other-field').slideDown();
+                        }
+                    } else {
+                        $checkbox.prop('checked', false);
+                        $btn.removeClass('active');
+                        
+                        // If unchecking "Other" and no other "other" checked
+                        if (checkboxValue === 'other') {
+                            var otherStillChecked = $('input[name="diet[]"][value="other"]:checked').length > 0;
+                            if (!otherStillChecked) {
+                                $('#diet-other-field').slideUp();
+                                $('input[name="diet_other"]').val('');
+                            }
+                        }
+                        
+                        // If no non-"No" options checked, check "No"
+                        var anyNonNoChecked = $('.crs-diet-btn input[type="checkbox"]:checked').not('[value="no"]').length > 0;
+                        if (!anyNonNoChecked) {
+                            var $noCheckbox = $('.crs-diet-btn input[type="checkbox"][value="no"]');
+                            $noCheckbox.prop('checked', true);
+                            $noCheckbox.closest('.crs-diet-btn').addClass('active');
                         }
                     }
                 }
                 
-                // If checking any non-"No" option, uncheck "No"
-                if (checkboxValue !== 'no' && !isChecked) {
-                    var $noCheckbox = $('.crs-diet-btn input[type="checkbox"][value="no"]');
-                    if ($noCheckbox.prop('checked')) {
-                        $noCheckbox.prop('checked', false);
-                        $noCheckbox.closest('.crs-diet-btn').removeClass('active');
+                // Update formData if exists
+                if (typeof formData !== 'undefined') {
+                    var selectedValues = [];
+                    $('input[name="diet[]"]:checked').each(function() {
+                        selectedValues.push($(this).val());
+                    });
+                    if (selectedValues.length === 0) {
+                        selectedValues = ['no'];
                     }
+                    formData.diet = selectedValues;
+                    formData.diet_other = $('input[name="diet_other"]').val();
+                    saveToLocalStorage();
                 }
                 
                 console.log('Selected diet values:', selectedValues);
             });
             
-            // Allergy radio handler
+            // Allergy radio handler - FIXED
             $('.crs-allergy-label').on('click', function(e) {
                 e.preventDefault();
+                var checkbox = $(this).find('input[type="checkbox"]');
+                checkbox.prop("checked", !checkbox.prop("checked"));
                 
                 var $label = $(this);
                 var $radio = $label.find('input[type="radio"]');
+                var radioValue = $radio.val();
                 
+                // Update radio checked state
                 $radio.prop('checked', true);
+                
+                // Update active class
                 $('.crs-allergy-label').removeClass('active');
                 $label.addClass('active');
                 
-                if ($radio.val() === 'yes') {
+                // Show/hide allergy details field
+                if (radioValue === 'yes') {
                     $('#allergy-yes-field').slideDown();
                 } else {
                     $('#allergy-yes-field').slideUp();
                     $('input[name="allergy_details"]').val('');
+                }
+                
+                // Update formData immediately (if formData exists in scope)
+                if (typeof formData !== 'undefined') {
+                    var selectedValues = [];
+                    $('input[name="diet[]"]:checked').each(function() {
+                        selectedValues.push($(this).val());
+                    });
+                    if (selectedValues.length === 0) {
+                        selectedValues = ['no'];
+                    }
+                    formData.diet = selectedValues;
+                    formData.diet_other = $('input[name="diet_other"]').val();
+                    saveToLocalStorage();
                 }
             });
             
@@ -286,6 +332,8 @@
                 
                 $('.crs-total-amount').text('€' + total);
             }
+
+            
             
             // Initialize total on page load
             updateMealsTotal();

@@ -5,7 +5,23 @@ if (!defined('ABSPATH')) exit;
 // এখানে শুধু HTML Template থাকবে, কোন function থাকবে না
 
 $booking_id = isset($booking) ? $booking->id : 0;
-var_dump($booking)
+// Safely extract dietary_info in case $dietary wasn't pre-assigned
+if (empty($dietary) && !empty($additional['dietary_info'])) {
+    $dietary = $additional['dietary_info'];
+}
+
+$diet_values = [];
+if (!empty($dietary['diet'])) {
+    $raw = $dietary['diet'];
+    $diet_values = is_array($raw) ? $raw : [$raw];
+    $diet_values = array_filter($diet_values, fn($d) => $d !== 'no' && trim($d) !== '');
+}
+
+$has_allergy    = !empty($dietary['allergy']) && $dietary['allergy'] === 'yes';
+$allergy_detail = $dietary['allergy_details'] ?? '';
+$diet_other   = $dietary['diet_other'] ?? '';
+
+$show_dietary = !empty($diet_values) || $has_allergy;
 ?>
 
 <div class="crs-loading-screen" id="crs-loading">
@@ -209,29 +225,52 @@ var_dump($booking)
             <?php endif; ?>
 
             <!-- Dietary Information -->
-            <?php if (!empty($dietary)): ?>
+            <?php if ($show_dietary): ?>
             <div class="crs-info-card">
                 <div class="crs-card-header">
                     <span class="crs-card-icon">🥗</span>
                     <h2 class="crs-card-title">Dietary Information</h2>
                 </div>
                 <div class="crs-card-body">
-                    <?php 
-                    $diet_values = [];
-                    if (!empty($dietary['diet'])) {
-                        $diet_values = is_array($dietary['diet']) ? $dietary['diet'] : [$dietary['diet']];
-                    }
-                    ?>
-                    <?php if (!empty($diet_values) && !(count($diet_values) == 1 && in_array('no', $diet_values))): ?>
+
+                    <?php if (!empty($diet_values)): ?>
+                    <p class="crs-diet-section-label">Diet Preferences</p>
                     <div class="crs-diet-tags">
-                        <?php foreach ($diet_values as $diet): if ($diet === 'no') continue; ?>
-                        <span class="crs-diet-tag"><?php echo ucfirst($diet); ?></span>
+                        <?php foreach ($diet_values as $diet): ?>
+                        <span class="crs-diet-tag"><?php echo esc_html(ucfirst($diet)); ?></span>
                         <?php endforeach; ?>
                     </div>
+                    <?php if (!empty($diet_other)): ?>
+                    <p class="crs-diet-other">
+                        <span class="crs-diet-other-label">Other details: </span>
+                        <?php echo esc_html($diet_other); ?>
+                    </p>
                     <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php if ($has_allergy): ?>
+                    <div class="crs-allergy-warning">
+                        <span class="crs-allergy-icon">⚠️</span>
+                        <div>
+                            <strong style="display:block; color:#991b1b; margin-bottom:4px;">Allergy Reported</strong>
+                            <?php if (!empty($allergy_detail)): ?>
+                            <span class="crs-allergy-text"><?php echo esc_html($allergy_detail); ?></span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php else: ?>
+                    <div style="display:flex; align-items:center; gap:8px; color:#059669; font-size:14px; padding:10px; background:#f0fdf4; border-radius:10px;">
+                        <span>✅</span> <span>No known allergies</span>
+                    </div>
+                    <?php endif; ?>
+
                 </div>
             </div>
             <?php endif; ?>
+
+
+
+
         </div>
     </div>
     
@@ -966,5 +1005,49 @@ jQuery(document).ready(function($) {
             align-items: flex-start;
         }
     }
+    .crs-diet-section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 10px;
+}
+
+.crs-diet-other {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.crs-diet-other-label {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.crs-allergy-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px;
+    background: #fef2f2;
+    border-radius: 12px;
+    border-left: 4px solid #ef4444;
+    margin-top: 16px;
+}
+
+.crs-allergy-title {
+    display: block;
+    color: #991b1b;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.crs-allergy-text {
+    color: #7f1d1d;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+}
     </style>
     
